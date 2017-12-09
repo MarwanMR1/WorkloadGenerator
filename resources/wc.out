@@ -1,0 +1,1836 @@
+gzip -dc wc_day1_1.gz wc_day1_1.gz.1  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_1.stats
+Initializing
+Reading Access Log
+Error: Failed to read initial request!
+gzip -dc wc_day2_1.gz wc_day2_1.gz.1  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_2.stats
+Initializing
+Reading Access Log
+Error: Failed to read initial request!
+gzip -dc wc_day3_1.gz wc_day3_1.gz.1  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_3.stats
+Initializing
+Reading Access Log
+Error: Failed to read initial request!
+gzip -dc wc_day4_1.gz wc_day4_1.gz.1  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_4.stats
+Initializing
+Reading Access Log
+Error: Failed to read initial request!
+gzip -dc wc_day5_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_5.stats
+Initializing
+Reading Access Log
+0
+325
+Terminating
+gzip -dc wc_day6_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_6.stats
+Initializing
+Reading Access Log
+0
+1000000
+1193353
+Terminating
+gzip -dc wc_day7_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_7.stats
+Initializing
+Reading Access Log
+0
+755705
+Terminating
+gzip -dc wc_day8_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_8.stats
+Initializing
+Reading Access Log
+0
+759722
+Terminating
+gzip -dc wc_day9_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_9.stats
+Initializing
+Reading Access Log
+0
+1000000
+1262614
+Terminating
+gzip -dc wc_day10_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_10.stats
+Initializing
+Reading Access Log
+0
+1000000
+1522111
+Terminating
+gzip -dc wc_day11_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_11.stats
+Initializing
+Reading Access Log
+0
+1000000
+1687818
+Terminating
+gzip -dc wc_day12_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_12.stats
+Initializing
+Reading Access Log
+0
+1000000
+1706620
+Terminating
+gzip -dc wc_day13_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_13.stats
+Initializing
+Reading Access Log
+0
+1000000
+1649818
+Terminating
+gzip -dc wc_day14_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_14.stats
+Initializing
+Reading Access Log
+0
+1000000
+1015840
+Terminating
+gzip -dc wc_day15_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_15.stats
+Initializing
+Reading Access Log
+0
+856237
+Terminating
+gzip -dc wc_day16_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_16.stats
+Initializing
+Reading Access Log
+0
+1000000
+1710897
+Terminating
+gzip -dc wc_day17_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_17.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2391368
+Terminating
+gzip -dc wc_day18_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_18.stats
+Initializing
+Reading Access Log
+0
+1000000
+1729379
+Terminating
+gzip -dc wc_day19_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_19.stats
+Initializing
+Reading Access Log
+0
+1000000
+1908583
+Terminating
+gzip -dc wc_day20_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_20.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2084016
+Terminating
+gzip -dc wc_day21_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_21.stats
+Initializing
+Reading Access Log
+0
+1000000
+1749868
+Terminating
+gzip -dc wc_day22_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_22.stats
+Initializing
+Reading Access Log
+0
+1000000
+1483189
+Terminating
+gzip -dc wc_day23_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_23.stats
+Initializing
+Reading Access Log
+0
+1000000
+1546195
+Terminating
+gzip -dc wc_day24_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_24.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2849881
+Terminating
+gzip -dc wc_day25_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_25.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3041727
+Terminating
+gzip -dc wc_day26_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_26.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2372796
+Terminating
+gzip -dc wc_day27_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_27.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3279725
+Terminating
+gzip -dc wc_day28_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_28.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2342242
+Terminating
+gzip -dc wc_day29_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_29.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2225475
+Terminating
+gzip -dc wc_day30_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_30.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3484290
+Terminating
+gzip -dc wc_day31_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_31.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+4139155
+Terminating
+gzip -dc wc_day32_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_32.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+4146069
+Terminating
+gzip -dc wc_day33_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_33.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+4482602
+Terminating
+gzip -dc wc_day34_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_34.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+4757727
+Terminating
+gzip -dc wc_day35_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_35.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3354874
+Terminating
+gzip -dc wc_day36_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_36.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3307322
+Terminating
+gzip -dc wc_day37_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_37.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+5586176
+Terminating
+gzip -dc wc_day38_1.gz wc_day38_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_38.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+7188041
+Terminating
+gzip -dc wc_day39_1.gz wc_day39_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_39.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+7894566
+Terminating
+gzip -dc wc_day40_1.gz wc_day40_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_40.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+8297253
+Terminating
+gzip -dc wc_day41_1.gz wc_day41_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_41.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+8093068
+Terminating
+gzip -dc wc_day42_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_42.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+5452684
+Terminating
+gzip -dc wc_day43_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_43.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+5734309
+Terminating
+gzip -dc wc_day44_1.gz wc_day44_2.gz wc_day44_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_44.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+14527889
+Terminating
+gzip -dc wc_day45_1.gz wc_day45_2.gz wc_day45_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_45.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+20068724
+Terminating
+gzip -dc wc_day46_1.gz wc_day46_2.gz wc_day46_3.gz wc_day46_4.gz wc_day46_5.gz wc_day46_6.gz wc_day46_7.gz wc_day46_8.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_46.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+50395084
+Terminating
+gzip -dc wc_day47_1.gz wc_day47_2.gz wc_day47_3.gz wc_day47_4.gz wc_day47_5.gz wc_day47_6.gz wc_day47_7.gz wc_day47_8.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_47.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+51000000
+52000000
+52406319
+Terminating
+gzip -dc wc_day48_1.gz wc_day48_2.gz wc_day48_3.gz wc_day48_4.gz wc_day48_5.gz wc_day48_6.gz wc_day48_7.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_48.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+48956621
+Terminating
+gzip -dc wc_day49_1.gz wc_day49_2.gz wc_day49_3.gz wc_day49_4.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_49.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+23528986
+Terminating
+gzip -dc wc_day50_1.gz wc_day50_2.gz wc_day50_3.gz wc_day50_4.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_50.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+21093494
+Terminating
+gzip -dc wc_day51_1.gz wc_day51_2.gz wc_day51_3.gz wc_day51_4.gz wc_day51_5.gz wc_day51_6.gz wc_day51_7.gz wc_day51_8.gz wc_day51_9.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_51.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+51000000
+52000000
+53000000
+54000000
+55000000
+56000000
+57000000
+58000000
+58013849
+Terminating
+gzip -dc wc_day52_1.gz wc_day52_2.gz wc_day52_3.gz wc_day52_4.gz wc_day52_5.gz wc_day52_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_52.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+40732114
+Terminating
+gzip -dc wc_day53_1.gz wc_day53_2.gz wc_day53_3.gz wc_day53_4.gz wc_day53_5.gz wc_day53_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_53.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+37911141
+Terminating
+gzip -dc wc_day54_1.gz wc_day54_2.gz wc_day54_3.gz wc_day54_4.gz wc_day54_5.gz wc_day54_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_54.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+35898959
+Terminating
+gzip -dc wc_day55_1.gz wc_day55_2.gz wc_day55_3.gz wc_day55_4.gz wc_day55_5.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_55.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+33695769
+Terminating
+gzip -dc wc_day56_1.gz wc_day56_2.gz wc_day56_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_56.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+17390942
+Terminating
+gzip -dc wc_day57_1.gz wc_day57_2.gz wc_day57_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_57.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+17224132
+Terminating
+gzip -dc wc_day58_1.gz wc_day58_2.gz wc_day58_3.gz wc_day58_4.gz wc_day58_5.gz wc_day58_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_58.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+36698571
+Terminating
+gzip -dc wc_day59_1.gz wc_day59_2.gz wc_day59_3.gz wc_day59_4.gz wc_day59_5.gz wc_day59_6.gz wc_day59_7.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_59.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+48340882
+Terminating
+gzip -dc wc_day60_1.gz wc_day60_2.gz wc_day60_3.gz wc_day60_4.gz wc_day60_5.gz wc_day60_6.gz wc_day60_7.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_60.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+48667813
+Terminating
+gzip -dc wc_day61_1.gz wc_day61_2.gz wc_day61_3.gz wc_day61_4.gz wc_day61_5.gz wc_day61_6.gz wc_day61_7.gz wc_day61_8.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_61.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+50539711
+Terminating
+gzip -dc wc_day62_1.gz wc_day62_2.gz wc_day62_3.gz wc_day62_4.gz wc_day62_5.gz wc_day62_6.gz wc_day62_7.gz wc_day62_8.gz wc_day62_9.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_62.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+51000000
+52000000
+53000000
+54000000
+55000000
+56000000
+57000000
+58000000
+59000000
+60000000
+61000000
+62000000
+62999999
+Terminating
+gzip -dc wc_day63_1.gz wc_day63_2.gz wc_day63_3.gz wc_day63_4.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_63.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+21414464
+Terminating
+gzip -dc wc_day64_1.gz wc_day64_2.gz wc_day64_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_64.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+19117739
+Terminating
+gzip -dc wc_day65_1.gz wc_day65_2.gz wc_day65_3.gz wc_day65_4.gz wc_day65_5.gz wc_day65_6.gz wc_day65_7.gz wc_day65_8.gz wc_day65_9.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_65.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+51000000
+52000000
+53000000
+54000000
+55000000
+56000000
+57000000
+58000000
+59000000
+60000000
+61000000
+62000000
+62228636
+Terminating
+gzip -dc wc_day66_1.gz wc_day66_2.gz wc_day66_3.gz wc_day66_4.gz wc_day66_5.gz wc_day66_6.gz wc_day66_7.gz wc_day66_8.gz wc_day66_9.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_66.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+45000000
+46000000
+47000000
+48000000
+49000000
+50000000
+51000000
+52000000
+53000000
+54000000
+55000000
+56000000
+57000000
+58000000
+59000000
+60000000
+61000000
+62000000
+62999999
+Terminating
+gzip -dc wc_day67_1.gz wc_day67_2.gz wc_day67_3.gz wc_day67_4.gz wc_day67_5.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_67.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+28356264
+Terminating
+gzip -dc wc_day68_1.gz wc_day68_2.gz wc_day68_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_68.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+17499486
+Terminating
+gzip -dc wc_day69_1.gz wc_day69_2.gz wc_day69_3.gz wc_day69_4.gz wc_day69_5.gz wc_day69_6.gz wc_day69_7.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_69.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+40000000
+41000000
+42000000
+43000000
+44000000
+44502990
+Terminating
+gzip -dc wc_day70_1.gz wc_day70_2.gz wc_day70_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_70.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+17885066
+Terminating
+gzip -dc wc_day71_1.gz wc_day71_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_71.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+12821605
+Terminating
+gzip -dc wc_day72_1.gz wc_day72_2.gz wc_day72_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_72.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+16760999
+Terminating
+gzip -dc wc_day73_1.gz wc_day73_2.gz wc_day73_3.gz wc_day73_4.gz wc_day73_5.gz wc_day73_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_73.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+39000000
+39874286
+Terminating
+gzip -dc wc_day74_1.gz wc_day74_2.gz wc_day74_3.gz wc_day74_4.gz wc_day74_5.gz wc_day74_6.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_74.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+23000000
+24000000
+25000000
+26000000
+27000000
+28000000
+29000000
+30000000
+31000000
+32000000
+33000000
+34000000
+35000000
+36000000
+37000000
+38000000
+38979859
+Terminating
+gzip -dc wc_day75_1.gz wc_day75_2.gz wc_day75_3.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_75.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+17510094
+Terminating
+gzip -dc wc_day76_1.gz wc_day76_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_76.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+11413461
+Terminating
+gzip -dc wc_day77_1.gz wc_day77_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_77.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+9111109
+Terminating
+gzip -dc wc_day78_1.gz wc_day78_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_78.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+13583357
+Terminating
+gzip -dc wc_day79_1.gz wc_day79_2.gz wc_day79_3.gz wc_day79_4.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_79.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+9000000
+10000000
+11000000
+12000000
+13000000
+14000000
+15000000
+16000000
+17000000
+18000000
+19000000
+20000000
+21000000
+22000000
+22262529
+Terminating
+gzip -dc wc_day80_1.gz wc_day80_2.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_80.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+7000000
+8000000
+8945362
+Terminating
+gzip -dc wc_day81_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_81.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+5000000
+6000000
+6326015
+Terminating
+gzip -dc wc_day82_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_82.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+4000000
+4849706
+Terminating
+gzip -dc wc_day83_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_83.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+3000000
+3898335
+Terminating
+gzip -dc wc_day84_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_84.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2487871
+Terminating
+gzip -dc wc_day85_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_85.stats
+Initializing
+Reading Access Log
+0
+1000000
+1905126
+Terminating
+gzip -dc wc_day86_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_86.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2673511
+Terminating
+gzip -dc wc_day87_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_87.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2541748
+Terminating
+gzip -dc wc_day88_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_88.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2263168
+Terminating
+gzip -dc wc_day89_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_89.stats
+Initializing
+Reading Access Log
+0
+1000000
+2000000
+2103547
+Terminating
+gzip -dc wc_day90_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_90.stats
+Initializing
+Reading Access Log
+0
+1000000
+1880804
+Terminating
+gzip -dc wc_day91_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_91.stats
+Initializing
+Reading Access Log
+0
+1000000
+1308356
+Terminating
+gzip -dc wc_day92_1.gz  | /users/haoyu/ita_public_tools/bin/read /users/haoyu/ita_public_tools/state/object_mappings.sort > /tmp/output/recreate_92.stats
+Initializing
+Reading Access Log
+0
+1000000
+1053032
+Terminating
