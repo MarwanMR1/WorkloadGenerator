@@ -8,6 +8,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import edu.usc.vmevent.traces.AzureVMEventTrace;
+import edu.usc.vmevent.traces.GoogleVMEventTrace;
 
 public class TestTraces {
 
@@ -41,6 +42,12 @@ public class TestTraces {
 	@Test
 	public void testAzureVMEvents() {
 		AzureVMEventTrace azure = new AzureVMEventTrace("/Users/haoyuh/Downloads/vmtable.csv");
+
+	}
+	
+	@Test
+	public void testGoogleVMEvents() {
+		GoogleVMEventTrace azure = new GoogleVMEventTrace("/Users/haoyuh/Downloads/google.csv");
 
 	}
 }

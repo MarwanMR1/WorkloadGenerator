@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class AzureVMEventTrace {
+public class GoogleVMEventTrace {
 
 	public static class VMEvent {
 		Set<Integer> addVMs = Sets.newHashSet();
@@ -27,14 +27,14 @@ public class AzureVMEventTrace {
 	private final TreeMap<Long, VMEvent> timeVMStateMap = Maps.newTreeMap();
 	private Long currentTime;
 
-	public AzureVMEventTrace(String traceFile) {
+	public GoogleVMEventTrace(String traceFile) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(new File(traceFile)));
 			String line = null;
 			int objIdCount = 0;
 			Map<String, Integer> vmIdMap = Maps.newHashMap();
 			while ((line = br.readLine()) != null) {
-				String vmIdStr = line.split(",")[0];
+				String vmIdStr = line.split(",")[1];
 				Integer vmId = vmIdMap.get(vmIdStr);
 				if (vmId == null) {
 					vmId = objIdCount;
@@ -42,22 +42,26 @@ public class AzureVMEventTrace {
 					objIdCount += 1;
 				}
 				final int id = vmId;
-				long create = Long.parseLong(line.split(",")[3]);
-				long delete = Long.parseLong(line.split(",")[4]);
-				timeVMStateMap.compute(create, (k, v) -> {
-					if (v == null) {
-						v = new VMEvent();
-					}
-					v.addVMs.add(id);
-					return v;
-				});
-				timeVMStateMap.compute(delete, (k, v) -> {
-					if (v == null) {
-						v = new VMEvent();
-					}
-					v.removeVMs.add(id);
-					return v;
-				});
+				long time = Long.parseLong(line.split(",")[0]);
+				long event = Long.parseLong(line.split(",")[2]);
+
+				if (event == 0) {
+					timeVMStateMap.compute(time, (k, v) -> {
+						if (v == null) {
+							v = new VMEvent();
+						}
+						v.addVMs.add(id);
+						return v;
+					});
+				} else if (event == 1) {
+					timeVMStateMap.compute(time, (k, v) -> {
+						if (v == null) {
+							v = new VMEvent();
+						}
+						v.removeVMs.add(id);
+						return v;
+					});
+				}
 			}
 			br.close();
 			currentTime = timeVMStateMap.firstKey();
