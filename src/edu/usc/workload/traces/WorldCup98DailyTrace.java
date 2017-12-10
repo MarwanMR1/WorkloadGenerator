@@ -71,16 +71,26 @@ public class WorldCup98DailyTrace extends WorkloadTrace {
 			objectIdMap.put(request.key, objectId);
 		}
 		if (request.isRead) {
-			readKeys.get(index).add(objectId);
+			readKeys.get(index).compute(objectId, (k, v) -> {
+				if (v == null) {
+					return 1;
+				}
+				return v + 1;
+			});
 		} else {
-			writeKeys.get(index).add(objectId);
+			writeKeys.get(index).compute(objectId, (k, v) -> {
+				if (v == null) {
+					return 1;
+				}
+				return v + 1;
+			});
 		}
 	}
 
 	private static Request process(String line) {
 		// "34600 - - [30/Apr/1998:21:30:17 +0000] \"GET /images/hm_bg.jpg HTTP/1.0\"
 		// 200 24736";
-		DateTime time = dtf.parseDateTime(line.split("1998")[1].split(" ")[0].substring(1));
+		DateTime time = dtf.parseDateTime(line.split("/1998:")[1].split(" ")[0]);
 		String key = line.split("\"")[1].split(" ")[1];
 		boolean isRead = line.contains("GET");
 		return new Request(time, key, isRead);
