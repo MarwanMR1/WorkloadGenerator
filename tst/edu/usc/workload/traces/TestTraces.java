@@ -1,13 +1,7 @@
 package edu.usc.workload.traces;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.json.JSONObject;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -32,53 +26,9 @@ public class TestTraces {
 
 	@Test
 	public void testWorldCupTrace() {
-		WorldCup98AllTrace all = new WorldCup98AllTrace(100,
+		WorldCup98AllTrace all = new WorldCup98AllTrace(10000000,
 				"/Users/haoyuh/Documents/PhdUSC/WorkloadGenerator/resources/wc.out");
 		all.print();
-	}
-
-	@Test
-	public void testWorldCupDailyTrace() {
-		try {
-			// WorldCup98DailyTrace t = new WorldCup98DailyTrace(100,
-			// "/tmp/output/recreate_66.stats", TimeUnit.HOURS);
-			// JSONObject obj = t.print();
-			// new File("/tmp/wc_66_hour.stats").createNewFile();
-			// BufferedWriter bw = new BufferedWriter(new FileWriter(new
-			// File("/tmp/wc_66_hour.stats")));
-			// bw.write(obj.toString());
-			// bw.flush();
-			// bw.close();
-
-			WorldCup98DailyTrace t = new WorldCup98DailyTrace(100, "/tmp/output/recreate_66.stats", TimeUnit.MINUTES);
-			JSONObject obj = t.print();
-			new File("/tmp/wc_66_min.stats").createNewFile();
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/tmp/wc_66_min.stats")));
-			bw.write(obj.toString());
-			bw.flush();
-			bw.close();
-			//
-			// t = new WorldCup98DailyTrace(100, "/tmp/output/recreate_66.stats",
-			// TimeUnit.SECONDS);
-			// obj = t.print();
-			// new File("/tmp/wc_66_sec.stats").createNewFile();
-			// bw = new BufferedWriter(new FileWriter(new File("/tmp/wc_66_sec.stats")));
-			// bw.write(obj.toString());
-			// bw.flush();
-			// bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	@Test
-	public void testWorldCupDailyPreTrace() {
-		WorldCup98PreprocessedTrace t = new WorldCup98PreprocessedTrace(100, "/tmp/wc_66_hour.stats");
-		t.print();
-
-		// t = new WorldCup98PreprocessedTrace(100, "/tmp/wc_66_min.stats");
-		// t.print();
 	}
 
 	@Test
