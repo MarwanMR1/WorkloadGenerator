@@ -23,16 +23,6 @@ public class WorldCup98Trace extends WorkloadTrace {
 	}
 
 	@Override
-	public Optional<Integer> getNextQPS() {
-		throw new IllegalAccessError();
-	}
-
-	@Override
-	public Optional<Double> getNextQPSFactor() {
-		throw new IllegalAccessError();
-	}
-
-	@Override
 	public Optional<Stats> getNextStats() {
 		if (currentDay > MAX_DAY) {
 			return Optional.empty();

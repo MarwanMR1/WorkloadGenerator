@@ -24,16 +24,12 @@ public class WikipediaTrace extends WorkloadTrace {
 			DateTime time = dtf.parseDateTime(start);
 			while (obj.optInt(dtf.print(time), -1) != -1) {
 				int qps = obj.getInt(dtf.print(time));
-				this.qpsTimeline.add(qps);
+				this.statsTimeline.add(new StatsImpl(qps, (double) qps / capacityPerNode));
 				time = time.plusDays(1);
 			}
 			br.close();
 		} catch (Exception e) {
 			throw e;
 		}
-		qpsTimeline.forEach(qps -> {
-			qpsFactorTimeline.add((double) qps / capacityPerNode);
-		});
-
 	}
 }

@@ -14,7 +14,8 @@ public class WorldCup98AllTrace extends WorkloadTrace {
 			String requestLine = null;
 			while ((line = br.readLine()) != null) {
 				if (line.contains("Terminating")) {
-					qpsTimeline.add(Integer.parseInt(requestLine));
+					int qps = Integer.parseInt(requestLine);
+					statsTimeline.add(new StatsImpl(qps, (double) qps / capacityPerNode));
 				}
 				requestLine = line;
 			}
@@ -22,8 +23,5 @@ public class WorldCup98AllTrace extends WorkloadTrace {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		qpsTimeline.forEach(qps -> {
-			qpsFactorTimeline.add((double) qps / capacityPerNode);
-		});
 	}
 }

@@ -10,8 +10,6 @@ import com.google.common.collect.Lists;
 public abstract class WorkloadTrace {
 	protected final int capacityPerNode;
 	private int currentRound = 0;
-	protected final List<Integer> qpsTimeline = Lists.newArrayList();
-	protected final List<Double> qpsFactorTimeline = Lists.newArrayList();
 	protected final List<Stats> statsTimeline = Lists.newArrayList();
 
 	public WorkloadTrace(int capacityPerNode) {
@@ -37,28 +35,31 @@ public abstract class WorkloadTrace {
 		public abstract Optional<List<WCRequest>> getNextBatchRequests(int limit);
 	}
 
-	public Optional<Integer> getNextQPS() {
-		if (currentRound >= qpsTimeline.size()) {
-			return Optional.empty();
-		}
-		return Optional.of(qpsTimeline.get(currentRound));
-	}
+	public static class StatsImpl extends Stats {
 
-	public Optional<Double> getNextQPSFactor() {
-		if (currentRound >= qpsFactorTimeline.size()) {
+		public StatsImpl(int qps, double qpsFactor) {
+			super(qps, qpsFactor);
+		}
+
+		@Override
+		public Optional<List<WCRequest>> getNextBatchRequests(int limit) {
 			return Optional.empty();
 		}
-		return Optional.of(qpsFactorTimeline.get(currentRound));
+
 	}
 
 	public Optional<Stats> getNextStats() {
-		return Optional.empty();
+		if (currentRound >= statsTimeline.size()) {
+			return Optional.empty();
+		}
+		Stats stats = statsTimeline.get(currentRound);
+		currentRound += 1;
+		return Optional.of(stats);
 	}
 
 	protected void initialize(int size) {
 		for (int i = 0; i < size; i++) {
-			qpsTimeline.add(0);
-			qpsFactorTimeline.add(0d);
+			statsTimeline.add(new StatsImpl(0, 0));
 		}
 	}
 
