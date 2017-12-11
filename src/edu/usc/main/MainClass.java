@@ -1,10 +1,18 @@
 package edu.usc.main;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import edu.usc.system.TheSystem;
+import edu.usc.vmevent.traces.AzureVMEventTrace;
+import edu.usc.vmevent.traces.GoogleVMEventTrace;
+import edu.usc.workload.traces.WikipediaTrace;
+import edu.usc.workload.traces.WorldCup98AllTrace;
+import edu.usc.workload.traces.WorldCup98DailyTrace;
+import edu.usc.workload.traces.WorldCup98PreprocessedTrace;
 import edu.usc.workload_generator.Outputs;
 import edu.usc.workload_generator.WorkloadGenerator;
+import edu.usc.workload_generator.WorkloadGenerator.Trace;
 
 public class MainClass {
 
@@ -14,13 +22,25 @@ public class MainClass {
 	static int numOfPartitionsInL = 100;
 	static int numOfKeysInPartition = 100;
 	static int workload = -1;
-	private static final int MAX_WORKLOAD = 5;
+	public static int C = 1000000;
+	static TimeUnit timeUnit = TimeUnit.HOURS;
+
+	static String location = "/home/mr1/eclipse-workspace/WorkloadGenerator/resources/wc.out";
+
+	private static final int MAX_WORKLOAD = 6;
 
 	public static void main(String[] args) {
 		TheSystem.MAX_GET_PER_MIGRATION = 50;
 		handleArguments(args);
-		System.out.println(String.format("N = %d, L = %d, kuP = %f, P_in_L = %d, Key_in_P = %d, max get per mig = %d",
-				N, L, kuP, numOfPartitionsInL, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION));
+		System.out.println(
+				String.format("N = %d, L = %d, kuP = %f, P_in_L = %d, Key_in_P = %d, max get per mig = %d, C = %d", N,
+						L, kuP, numOfPartitionsInL, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION, C));
+		if (workload == 6) {
+			System.out.println("Trace: " + WorkloadGenerator.trace.toString() + ", Location: " + location);
+			if(WorkloadGenerator.trace == Trace.WC98Daily) {
+				System.out.println("Time unit: " + timeUnit.toString());
+			}
+		}
 		System.out.println("Workload " + workload);
 		int numOfPartitions = N * L * numOfPartitionsInL;
 		int K = numOfPartitions * numOfKeysInPartition;
@@ -32,6 +52,8 @@ public class MainClass {
 		WorkloadGenerator.addM = -1;
 		WorkloadGenerator.removeM = -1;
 		WorkloadGenerator.Q = false;
+		WorkloadGenerator.W = false;
+		WorkloadGenerator.WORKLOAD = workload;
 		switch (workload) {
 		case 1:
 			iterations = 1;
@@ -56,6 +78,35 @@ public class MainClass {
 		case 5:
 			WorkloadGenerator.Q = true;
 			WorkloadGenerator.numOfRounds = 100;
+			break;
+		case 6:
+			WorkloadGenerator.W = true;
+			switch (WorkloadGenerator.trace) {
+			case AzureVM:
+				WorkloadGenerator.azure = new AzureVMEventTrace(location);
+				break;
+			case GoogleVM:
+				WorkloadGenerator.google = new GoogleVMEventTrace(location);
+				break;
+			case WC98All:
+				WorkloadGenerator.wt = new WorldCup98AllTrace(C, location);
+				break;
+			case WC98Daily:
+//				WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
+				WorkloadGenerator.wt = new WorldCup98PreprocessedTrace(C, location);
+				break;
+			case Wikipedia:
+				try {
+					WorkloadGenerator.wt = new WikipediaTrace(C, location);
+				} catch (Exception e) {
+					e.printStackTrace(System.out);
+					System.exit(0);
+				}
+				break;
+			default:
+				break;
+
+			}
 			break;
 		default:
 			System.out.println("ERROR: incorrect workload. Exit");
@@ -91,8 +142,14 @@ public class MainClass {
 				i++;
 				N = handleArguments_parseInt(args[i]);
 				break;
+			case "-C":
+				handleArguments_valueExist(i, args.length, "Missing node capacity. The value for -C.");
+				i++;
+				C = handleArguments_parseInt(args[i]);
+				break;
 			case "-workload":
-				handleArguments_valueExist(i, args.length, "Missing workload id [1,"+MAX_WORKLOAD+"] after -workload.");
+				handleArguments_valueExist(i, args.length,
+						"Missing workload id [1," + MAX_WORKLOAD + "] after -workload.");
 				i++;
 				workload = handleArguments_parseInt(args[i]);
 				break;
@@ -119,9 +176,25 @@ public class MainClass {
 				i++;
 				kuP = handleArguments_parseFloat(args[i]);
 				break;
+			case "-file":
+				handleArguments_valueExist(i, args.length, "Missing file location after -file.");
+				i++;
+				location = args[i];
+				break;
+			case "-trace":
+				handleArguments_valueExist(i, args.length, "Missing trace [azure, google, wcAll, wcDaily, wiki] after -trace.");
+				i++;
+				WorkloadGenerator.trace = handleArguments_parseTrace(args[i]);
+				break;
+			case "-time":
+				handleArguments_valueExist(i, args.length,
+						"Missing time unit [day, hour, min, sec, milli, micro, nano] after -time.");
+				i++;
+				timeUnit = handleArguments_parseTimeUnit(args[i]);
+				break;
 			case "-h":
 			case "-help":
-				//				System.out.println("Tuner v." + version);
+				// System.out.println("Tuner v." + version);
 				System.out.println("How to use?");
 				System.out.println("MainClass [-N num][-L num][-P num][-K num][-Update float]");
 				System.out.println();
@@ -152,7 +225,55 @@ public class MainClass {
 		} else if (workload < 1 || workload > MAX_WORKLOAD) {
 			System.err.println("ERROR: workload can be 1, 2, ... to " + MAX_WORKLOAD);
 			System.exit(0);
+		} else if (workload == 6 && WorkloadGenerator.trace == null) {
+			System.err.println("ERROR: trace is missing. Use -trace [azure, google, wcAll, wcDaily, wiki]");
+			System.exit(0);
 		}
+	}
+
+	private static TimeUnit handleArguments_parseTimeUnit(String str) {
+
+		switch (str) {
+		case "day":
+			return TimeUnit.DAYS;
+		case "hour":
+			return TimeUnit.HOURS;
+		case "min":
+			return TimeUnit.MINUTES;
+		case "sec":
+			return TimeUnit.SECONDS;
+		case "milli":
+			return TimeUnit.MILLISECONDS;
+		case "micro":
+			return TimeUnit.MICROSECONDS;
+		case "nano":
+			return TimeUnit.NANOSECONDS;
+		default:
+			System.out.println("ERROR: incorrect time unit (" + str + ").");
+			System.out.println("You can select from [day, hour, min, sec, milli, micro, nano]");
+			System.exit(0);
+		}
+		return null;
+	}
+
+	private static Trace handleArguments_parseTrace(String str) {
+		switch (str) {
+		case "wiki":
+			return Trace.Wikipedia;
+		case "wcAll":
+			return Trace.WC98All;
+		case "wcDaily":
+			return Trace.WC98Daily;
+		case "google":
+			return Trace.GoogleVM;
+		case "azure":
+			return Trace.AzureVM;
+		default:
+			System.out.println("ERROR: incorrect trace (" + str + ").");
+			System.out.println("You can select from [azure, google, wcAll, wcDaily, wiki]");
+			System.exit(0);
+		}
+		return null;
 	}
 
 	private static void handleArguments_valueExist(int cur, int length, String errorMSG) {
