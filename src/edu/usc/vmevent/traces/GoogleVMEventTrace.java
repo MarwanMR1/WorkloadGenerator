@@ -5,24 +5,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+
+import edu.usc.vmevent.traces.AzureVMEventTrace.VMEvent;
 
 public class GoogleVMEventTrace {
-
-	public static class VMEvent {
-		Set<Integer> addVMs = Sets.newHashSet();
-		Set<Integer> removeVMs = Sets.newHashSet();
-
-		@Override
-		public String toString() {
-			return "VMEvent [addVMs=" + addVMs + ", removeVMs=" + removeVMs + "]";
-		}
-
-	}
 
 	private final TreeMap<Long, VMEvent> timeVMStateMap = Maps.newTreeMap();
 	private Long currentTime;
@@ -50,7 +39,11 @@ public class GoogleVMEventTrace {
 						if (v == null) {
 							v = new VMEvent();
 						}
-						v.addVMs.add(id);
+						if (v.removeVMs.contains(id)) {
+							v.removeVMs.remove(id);
+						} else {
+							v.addVMs.add(id);
+						}
 						return v;
 					});
 				} else if (event == 1) {
@@ -58,7 +51,11 @@ public class GoogleVMEventTrace {
 						if (v == null) {
 							v = new VMEvent();
 						}
-						v.removeVMs.add(id);
+						if (v.addVMs.contains(id)) {
+							v.addVMs.remove(id);
+						} else {
+							v.removeVMs.add(id);
+						}
 						return v;
 					});
 				}

@@ -32,14 +32,14 @@ public class WorldCup98Trace extends WorkloadTrace {
 			BufferedReader br = new BufferedReader(new FileReader(new File(file)));
 			int qps = Integer.parseInt(br.readLine());
 			WCStats stats = new WCStats(qps, (double) qps / (double) capacityPerNode, br);
+			currentHour += 1;
+			if (currentHour == 24) {
+				currentDay += 1;
+				currentHour = 0;
+			}
 			return Optional.of(stats);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		currentHour += 1;
-		if (currentHour == 24) {
-			currentDay += 1;
-			currentHour = 0;
 		}
 		return Optional.empty();
 	}
