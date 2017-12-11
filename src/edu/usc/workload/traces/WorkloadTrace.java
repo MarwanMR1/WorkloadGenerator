@@ -51,11 +51,8 @@ public abstract class WorkloadTrace {
 		return Optional.of(qpsFactorTimeline.get(currentRound));
 	}
 
-	public Optional<Stats> getNextBatchRequests(int limit) {
-		if (currentRound >= statsTimeline.size()) {
-			return Optional.empty();
-		}
-		return Optional.of(statsTimeline.get(currentRound));
+	public Optional<Stats> getNextStats() {
+		return Optional.empty();
 	}
 
 	protected void initialize(int size) {

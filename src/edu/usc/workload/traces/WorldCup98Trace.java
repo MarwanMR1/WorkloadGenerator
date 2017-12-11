@@ -33,7 +33,7 @@ public class WorldCup98Trace extends WorkloadTrace {
 	}
 
 	@Override
-	public Optional<Stats> getNextBatchRequests(int limit) {
+	public Optional<Stats> getNextStats() {
 		if (currentDay > MAX_DAY) {
 			return Optional.empty();
 		}
