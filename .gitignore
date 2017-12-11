@@ -3,5 +3,8 @@
 
 # Package Files #
 *.jar
+
 /bin/
+
+
 /target/

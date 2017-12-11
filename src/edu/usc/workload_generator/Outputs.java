@@ -44,7 +44,6 @@ public class Outputs {
 		System.out.println("Total number of lost keys," + lost_keys + "," + lP + "%");
 		System.out.println("Total stale lost keys," + lost_key_stales + "," + sP + "%");
 		System.out.println("Total number of miss keys," + miss_keys + "," + mP + "%");
-		System.out.println("Total number of miss keys," + miss_keys + "," + mP + "%");
 		System.out.println("Total number of migrated keys," + mig + "," + migP + "%");
 		System.out.println("Total number of keys not migrated due invalid configId," + mig_invalid + "," + migInvP + "%");
 	}

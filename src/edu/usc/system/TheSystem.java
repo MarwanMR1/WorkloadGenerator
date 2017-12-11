@@ -130,7 +130,7 @@ public class TheSystem {
 		}
 		config++;
 
-		for (int i = 0, j = 0, k = 0, l = firstNew; i < migPartitions; i++) {
+		for (int i = 0, j = 0, k = 0, l = firstNew; i < (migPartitions*numNodes); i++) {
 			Partition p = caches.get(j).partitions.get(rand.nextInt(caches.get(j).partitions.size()));
 			caches.get(j).partitions.remove(p);
 			nodes.get(l).caches.get(k).partitions.add(p);
@@ -175,6 +175,10 @@ public class TheSystem {
 	}
 
 	public void removeNode() {
+		if(N == 1) {
+			System.out.println("ERROR: only one node,,,, can't delete");
+			return;
+		}
 		config++;
 		ArrayList<Partition> partitionsToMigrate = sortNodesInc(1);
 
