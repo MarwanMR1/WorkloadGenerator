@@ -3,3 +3,6 @@
 
 # Package Files #
 *.jar
+.settings/
+/bin/
+/target/
