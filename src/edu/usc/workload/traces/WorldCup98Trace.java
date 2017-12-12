@@ -22,12 +22,20 @@ public class WorldCup98Trace extends WorkloadTrace {
 		this.baseDir = baseDir;
 	}
 
+	public int getCurrentDay() {
+		return currentDay;
+	}
+
+	public int getCurrentHour() {
+		return currentHour;
+	}
+
 	@Override
 	public Optional<Stats> getNextStats() {
 		if (currentDay > MAX_DAY) {
 			return Optional.empty();
 		}
-		String file = String.format("%s/wcday$d/wc_day%d_%d", baseDir, currentDay, currentDay, currentHour);
+		String file = String.format("%s/wcday%d/wc_day%d_%d", baseDir, currentDay, currentDay, currentHour);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(new File(file)));
 			int qps = Integer.parseInt(br.readLine());
@@ -94,6 +102,30 @@ public class WorldCup98Trace extends WorkloadTrace {
 			} else {
 				requests.add(new WCRequest(key, false));
 			}
+		}
+	}
+
+	public static void main(String[] args) {
+		WorldCup98Trace trace = new WorldCup98Trace(100, "/mnt/output");
+		Optional<Stats> stats = trace.getNextStats();
+		while (stats.isPresent()) {
+			Optional<List<WCRequest>> req = stats.get().getNextBatchRequests(10000);
+			int reads = 0;
+			int writes = 0;
+			while (req.isPresent()) {
+				for (int i = 0; i < req.get().size(); i++) {
+					if (req.get().get(i).isRead) {
+						reads++;
+					} else {
+						writes++;
+					}
+				}
+				req = stats.get().getNextBatchRequests(10000);
+			}
+			System.out.println(String.format("day-%d-hour-%d, qps=%d, qpsf=%f, read=%d, write=%d, total=%d",
+					trace.getCurrentDay(), trace.getCurrentHour(), stats.get().qps, stats.get().qpsFactor, reads,
+					writes, reads + writes));
+			stats = trace.getNextStats();
 		}
 	}
 
