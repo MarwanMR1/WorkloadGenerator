@@ -23,8 +23,16 @@ public abstract class WorkloadTrace {
 	}
 
 	public static abstract class Stats {
-		int qps;
-		double qpsFactor;
+		private int qps;
+		private double qpsFactor;
+
+		public int getQps() {
+			return qps;
+		}
+
+		public double getQpsFactor() {
+			return qpsFactor;
+		}
 
 		public Stats(int qps, double qpsFactor) {
 			super();
@@ -64,6 +72,14 @@ public abstract class WorkloadTrace {
 	}
 
 	public static class WCRequest {
+		public int getKey() {
+			return key;
+		}
+
+		public boolean isRead() {
+			return isRead;
+		}
+
 		int key;
 		boolean isRead;
 

@@ -1,6 +1,9 @@
 package edu.usc.main;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import edu.usc.system.TheSystem;
@@ -8,8 +11,7 @@ import edu.usc.vmevent.traces.AzureVMEventTrace;
 import edu.usc.vmevent.traces.GoogleVMEventTrace;
 import edu.usc.workload.traces.WikipediaTrace;
 import edu.usc.workload.traces.WorldCup98AllTrace;
-import edu.usc.workload.traces.WorldCup98DailyTrace;
-import edu.usc.workload.traces.WorldCup98PreprocessedTrace;
+import edu.usc.workload.traces.WorldCup98Trace;
 import edu.usc.workload_generator.Outputs;
 import edu.usc.workload_generator.WorkloadGenerator;
 import edu.usc.workload_generator.WorkloadGenerator.Trace;
@@ -19,11 +21,12 @@ public class MainClass {
 	static int N = 100;
 	static int L = 100;
 	static float kuP = 0.05f;
-	static int numOfPartitionsInL = 100;
-	static int numOfKeysInPartition = 100;
+	public static int numOfPartitionsInL = 100;
+	public static int numOfKeysInPartition = 100;
 	static int workload = -1;
 	public static int C = 1000000;
 	static TimeUnit timeUnit = TimeUnit.HOURS;
+	private static String outputFileLocation;
 
 	static String location = "/home/mr1/eclipse-workspace/WorkloadGenerator/resources/wc.out";
 
@@ -37,9 +40,6 @@ public class MainClass {
 						L, kuP, numOfPartitionsInL, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION, C));
 		if (workload == 6) {
 			System.out.println("Trace: " + WorkloadGenerator.trace.toString() + ", Location: " + location);
-			if(WorkloadGenerator.trace == Trace.WC98Daily) {
-				System.out.println("Time unit: " + timeUnit.toString());
-			}
 		}
 		System.out.println("Workload " + workload);
 		int numOfPartitions = N * L * numOfPartitionsInL;
@@ -93,7 +93,7 @@ public class MainClass {
 				break;
 			case WC98Daily:
 //				WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
-				WorkloadGenerator.wt = new WorldCup98PreprocessedTrace(C, location);
+				WorkloadGenerator.wt = new WorldCup98Trace(C, location);
 				break;
 			case Wikipedia:
 				try {
@@ -128,9 +128,18 @@ public class MainClass {
 			}
 		}
 
-		WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op);
+		WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op, outputFileLocation);
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		System.out.println(dateFormat.format(date)); 
+		
 		Outputs o = w.run();
+		
 		o.print();
+		
+		date = new Date();
+		System.out.println(dateFormat.format(date)); 
 
 	}
 
@@ -181,6 +190,11 @@ public class MainClass {
 				i++;
 				location = args[i];
 				break;
+			case "-outputfile":
+				handleArguments_valueExist(i, args.length, "Missing output file location after -outputfile.");
+				i++;
+				outputFileLocation = args[i];
+				break;
 			case "-trace":
 				handleArguments_valueExist(i, args.length, "Missing trace [azure, google, wcAll, wcDaily, wiki] after -trace.");
 				i++;
@@ -227,6 +241,9 @@ public class MainClass {
 			System.exit(0);
 		} else if (workload == 6 && WorkloadGenerator.trace == null) {
 			System.err.println("ERROR: trace is missing. Use -trace [azure, google, wcAll, wcDaily, wiki]");
+			System.exit(0);
+		} else if (outputFileLocation == null) {
+			System.err.println("ERROR: output file location is null. Please use -outputfile to set the output file location.");
 			System.exit(0);
 		}
 	}

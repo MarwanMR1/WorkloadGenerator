@@ -4,8 +4,8 @@ public class Partition {
 	private int id;
 	public int config;
 	public int srcConfig;
-//	public int serverId;
-//	public int srcServerId;
+	// public int serverId;
+	// public int srcServerId;
 	public Cache server;
 	public Cache srcServer;
 	public PartitionStatus status;
@@ -29,7 +29,7 @@ public class Partition {
 	public void incGetCounter() {
 		if (status == PartitionStatus.Migration) {
 			get_counter++;
-			if(get_counter == TheSystem.MAX_GET_PER_MIGRATION) {
+			if (get_counter == TheSystem.MAX_GET_PER_MIGRATION) {
 				status = PartitionStatus.Normal;
 				get_counter = 0;
 				srcServer = null;
@@ -39,7 +39,15 @@ public class Partition {
 	}
 
 	public String toString() {
-		return id + "[config: " + config + ", " + status.toString() + ", "
-				+ (status == PartitionStatus.Migration ? (srcServer.id + " -> " + server.id + ", "+ get_counter+"/"+TheSystem.MAX_GET_PER_MIGRATION) : server.id)+"]";
+		return id + "[config: " + config + ", " + status.toString() + ", " + (status == PartitionStatus.Migration
+				? (srcServer.id + " -> " + server.id + ", " + get_counter + "/" + TheSystem.MAX_GET_PER_MIGRATION)
+				: server.id) + "]";
+	}
+
+	public void terminateMigration() {
+		status = PartitionStatus.Normal;
+		get_counter = 0;
+		srcServer = null;
+		srcConfig = -1;
 	}
 }

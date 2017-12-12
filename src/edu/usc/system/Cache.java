@@ -1,16 +1,15 @@
 package edu.usc.system;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Cache {
 	public final String id;
-	public HashMap<Integer, ValueWrapper> hashTable;
 	public ArrayList<Partition> partitions;
+	public Node node;
 	
-	public Cache(final String id) {
+	public Cache(final String id, Node node) {
 		this.id = id;
-		hashTable = new HashMap<>();
+		this.node = node;
 		partitions = new ArrayList<>();
 	}
 	

@@ -7,6 +7,9 @@ public class Outputs {
 	public long miss_keys;
 	public long mig;
 	public long mig_invalid;
+	
+	public long gets;
+	public long sets;
 
 	public Outputs() {
 		lost_keys = 0;
@@ -15,6 +18,9 @@ public class Outputs {
 		miss_keys = 0;
 		mig = 0;
 		mig_invalid = 0;
+		
+		gets = 0;
+		sets = 0;
 	}
 
 	public void add(Outputs input) {
@@ -24,6 +30,9 @@ public class Outputs {
 		this.miss_keys += input.miss_keys;
 		this.mig += input.mig;
 		this.mig_invalid += input.mig_invalid;
+		
+		this.gets += input.gets;
+		this.sets += input.sets;
 	}
 
 	public String toString() {

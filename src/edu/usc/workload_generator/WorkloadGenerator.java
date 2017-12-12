@@ -1,10 +1,10 @@
 package edu.usc.workload_generator;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import edu.usc.main.MainClass;
 import edu.usc.system.Configuration;
@@ -15,7 +15,8 @@ import edu.usc.vmevent.traces.AzureVMEventTrace;
 import edu.usc.vmevent.traces.AzureVMEventTrace.VMEvent;
 import edu.usc.vmevent.traces.GoogleVMEventTrace;
 import edu.usc.workload.traces.WorkloadTrace;
-import edu.usc.workload.traces.WorldCup98AllTrace;
+import edu.usc.workload.traces.WorkloadTrace.Stats;
+import edu.usc.workload.traces.WorkloadTrace.WCRequest;
 
 public class WorkloadGenerator {
 
@@ -43,21 +44,22 @@ public class WorkloadGenerator {
 	public static Trace trace;
 	public static AzureVMEventTrace azure;
 	public static GoogleVMEventTrace google;
-	private Optional<Double> wtObject;
-	private Optional<Integer> qpsObject;
-	private Optional<Map<Integer, Integer>> wtReads;
-	private Optional<Map<Integer, Integer>> wtWrites;
+	private String outputFileLocation;
+	private Optional<Stats> wtObject;
+	private final int BATCH_SIZE = 1000;
+	private boolean firstTime = true;
 
 	// private HashMap<Integer, GetOutput> cache = new HashMap<>();
 
 	public WorkloadGenerator(int N, int L, int K, float kuP, int numOfPartitions, int number_Of_Iterations,
-			ArrayList<ReconfigurationType> op) {
+			ArrayList<ReconfigurationType> op, String outputFileLocation) {
 		this.Nn = N;
 		this.L = L;
 		this.K = K;
 		this.kuP = kuP;
 		this.number_Of_Iterations = number_Of_Iterations;
 		this.numOfPartitions = numOfPartitions;
+		this.outputFileLocation = outputFileLocation;
 		// rand = new Random(1);
 		this.op = op;
 		if (Q) {
@@ -69,6 +71,32 @@ public class WorkloadGenerator {
 	public Outputs run() {
 		check_input();
 
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(outputFileLocation);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace(System.out);
+		}
+
+		if (W) {
+			wtObject = wt.getNextStats();
+			if (wtObject.isPresent()) {
+				Stats stats = wtObject.get();
+				w = stats.getQpsFactor();
+				qps = stats.getQps();
+				Nn = (int) Math.round(((double) qps) / MainClass.C);
+				if(Nn == 0) {
+					Nn = 1;
+				}
+
+				System.out.println("UPDATE init values");
+				System.out.println("N: " + Nn);
+			} else {
+				System.out.println("ERROR: wtObject isEmpty in the first check");
+				System.exit(0);
+			}
+
+		}
 		// long start = System.nanoTime();
 		TheSystem sys = new TheSystem(Nn, L, numOfPartitions);
 		// long duration = System.nanoTime() - start;
@@ -94,15 +122,21 @@ public class WorkloadGenerator {
 		if (Q) {
 			extraValue = "q,";
 		} else if (W) {
-			extraValue = "W,QPS,wantedNodes,WGets,WSets,";
+			extraValue = "W,QPS,wantedNodes,";
 		}
 
-		System.out.println("Round,Action," + extraValue
+		System.out.println("Round,Action,cid," + extraValue
 				+ "N,addedNodes,removedNodes,Gets,Sets,Valid,Lost,Lost(stale),miss,migrated,not migrated");
 		int loop_size = Q ? numOfRounds : op.size();
 
-		int addM_round = 0;
-		int removeM_round = 0;
+		int addM_round = 0, logAdded = 0;
+		int removeM_round = 0, logRemoved = 0;
+		int valid_keys = 0, lost_keys = 0, missed_keys = 0;
+		int gets = 0, sets = 0;
+		double oldW = 0;
+
+		int numHours = 0;
+		out.println("config,N,Added,Removed,W,valid_keys,lost_keys,missed_keys,gets,sets");
 
 		for (int loop = 0; isDone(loop, loop_size); loop++) {
 			String actionName = "";
@@ -112,15 +146,34 @@ public class WorkloadGenerator {
 					qBase *= -1;
 				}
 			} else if (W) {
-				wtReads = wt.getReadKeys(loop);
-				wtWrites = wt.getWriteKeys(loop);
-				qpsObject = wt.getQPS(loop);
+				Stats stats = wtObject.get();
+				w = stats.getQpsFactor();
+				qps = stats.getQps();
 			}
 			ReconfigurationType action = getAction(loop, sys.getN());
+
+			if ((trace == Trace.WC98Daily && numHours == 24)
+					|| (trace != Trace.WC98Daily && action != ReconfigurationType.NOTHING)) {
+				out.println(String.format("%d,%d,%d,%d,%f,%d,%d,%d", con.config, sys.getN(), logAdded, logRemoved, oldW,
+						valid_keys, lost_keys, missed_keys, gets, sets));
+				out.flush();
+				lost_keys = 0;
+				missed_keys = 0;
+				gets = 0;
+				sets = 0;
+				oldW = w;
+				logAdded = 0;
+				logRemoved = 0;
+				numHours = 0;
+			} else {
+				numHours++;
+			}
 			switch (action) {// rand.nextInt(2)
 			case ADD_NODE:
 				addM_round = 1;
 				removeM_round = 0;
+				logAdded = 1;
+				logRemoved = 0;
 				// start = System.nanoTime();
 				sys.addNode();
 				// duration = System.nanoTime() - start;
@@ -130,6 +183,8 @@ public class WorkloadGenerator {
 			case REMOVE_NODE:
 				addM_round = 0;
 				removeM_round = 1;
+				logAdded = 0;
+				logRemoved = 1;
 				// start = System.nanoTime();
 				sys.removeNode();
 				// duration = System.nanoTime() - start;
@@ -139,20 +194,29 @@ public class WorkloadGenerator {
 			case ADD_M_NODES:
 				addM_round = addM;
 				removeM_round = 0;
+				logAdded = addM;
+				logRemoved = 0;
 				// start = System.nanoTime();
+				// long start = System.nanoTime();
 				sys.addMultipleNodes(addM);
-				// duration = System.nanoTime() - start;
+				// long duration = System.nanoTime() - start;
 				// System.out.println("addNode " + (duration / 1000000000.0) + " sec");
 				actionName = "addM-" + addM;
+				// System.out.println(sys.cachesPartitionsInfo());
+				// sys.debugPartitions();
 				break;
 			case REMOVE_M_NODES:
 				addM_round = 0;
 				removeM_round = removeM;
-				// start = System.nanoTime();
+				logAdded = 0;
+				logRemoved = removeM;
+				// long start = System.nanoTime();
 				sys.removeMultipleNode(removeM);
-				// duration = System.nanoTime() - start;
-				// System.out.println("addNode " + (duration / 1000000000.0) + " sec");
+				// long duration = System.nanoTime() - start;
+				// System.out.println("RemoveNode " + (duration / 1000000000.0) + " sec");
 				actionName = "removeM-" + removeM;
+				// System.out.println(sys.cachesPartitionsInfo());
+				// sys.debugPartitions();
 				break;
 			case NOTHING:
 				addM_round = 0;
@@ -160,7 +224,8 @@ public class WorkloadGenerator {
 				actionName = "noAction";
 				break;
 			}
-			System.out.print(loop + "," + actionName + ",");
+			con = sys.getConfiguration();
+			System.out.print(loop + "," + actionName + "," + con.config + ",");
 			if (Q) {
 				if (q == 10) {
 					System.out.print("1,");
@@ -168,24 +233,98 @@ public class WorkloadGenerator {
 					System.out.print("0." + q + ",");
 				}
 			} else if (W) {
-				System.out.print(w + "," + qpsObject.get() + ","
-						+ ((int) Math.round(((double) qpsObject.get()) / MainClass.C)) + ",");
-				int reads = 0, writes = 0;
-				if (wtReads.isPresent()) {
-					reads = wtReads.get().size();
-				}
-				if (wtWrites.isPresent()) {
-					writes = wtWrites.get().size();
-				}
-				System.out.print(reads + "," + writes + ",");
+				System.out.print(w + "," + qps + "," + ((int) Math.round(((double) qps) / MainClass.C)) + ",");
 			}
 			System.out.print(sys.getN() + "," + addM_round + "," + removeM_round + ",");
-			con = sys.getConfiguration();
-			Outputs result = perform_Operations(sys, con.P, con.config, action == ReconfigurationType.NOTHING);
+
+			Outputs result = null;
+			if (trace == Trace.WC98Daily) {
+				result = perform_Operations_Provided(sys, con.P, con.config, action == ReconfigurationType.NOTHING);
+			} else {
+				result = perform_Operations(sys, con.P, con.config, action == ReconfigurationType.NOTHING);
+			}
+			valid_keys += result.valid_keys;
+			lost_keys += result.lost_keys;
+			missed_keys += result.miss_keys;
+			gets += result.gets;
+			sets += result.sets;
+
 			total.add(result);
 		}
 
+		out.close();
 		return total;
+	}
+
+	private Outputs perform_Operations_Provided(TheSystem sys, Partition[] P, int config, boolean isNoAction) {
+		Outputs result = new Outputs();
+		int debugKey = -1;
+
+		// get list
+		Stats stats = wtObject.get();
+		Optional<List<WCRequest>> listObject = stats.getNextBatchRequests(BATCH_SIZE);
+		// while is present
+		while (listObject.isPresent()) {
+			List<WCRequest> list = listObject.get();
+			// loop list
+			for (WCRequest keyObject : list) {
+				int key = keyObject.getKey();
+				boolean op = keyObject.isRead(); // true -> get, false -> set
+				if (op) {
+					// get
+					boolean valid = true;
+					ValueWrapper getOutput = sys.get(key);
+					result.gets++;
+					if (key == debugKey) {
+						System.out.print("key " + key + ", P" + P[getHash(key)] + ", value" + getOutput);
+					}
+					if (isMig) {
+						result.mig++;
+					}
+					if (isMig_invalid) {
+						result.mig_invalid++;
+					}
+					if (getOutput == null) {
+						if (key == debugKey) {
+							System.out.print(" ... is null");
+						}
+						result.miss_keys++;
+						sys.set(key, getValue(key, config), config, true);
+						valid = false;
+					} else if (is_lost(key, getOutput.config_num, P)) {
+						valid = false;
+						result.lost_keys++;
+						if (key == debugKey) {
+							System.out.print(" ... is lost");
+						}
+					}
+					if (key == debugKey) {
+						System.out.println();
+					}
+					if (valid) {
+						result.valid_keys++;
+					}
+				} else {
+					// set
+					sys.set(key, getValue(key, config), config, true);
+					result.sets++;
+				}
+			}
+			// get list
+			listObject = stats.getNextBatchRequests(BATCH_SIZE);
+		}
+
+		// loop P and terminate migration
+		if (!TheSystem.noMigration) {
+			for (int i = 0; i < P.length; i++) {
+				P[i].terminateMigration();
+			}
+		}
+		// print line
+		System.out.println(String.format("%d,%d,%d,%d,%d,%d,%d,%d", result.gets, result.sets, result.valid_keys,
+				result.lost_keys, result.lost_key_stales, result.miss_keys, result.mig, result.mig_invalid));
+
+		return result;
 	}
 
 	private boolean isDone(int loop, int loop_size) {
@@ -195,7 +334,11 @@ public class WorkloadGenerator {
 			} else if (trace == Trace.GoogleVM) {
 				google.getNextEvent();
 			} else {
-				wtObject = wt.getQPSFactor(loop);
+				if (!firstTime) {
+					wtObject = wt.getNextStats();
+				} else {
+					firstTime = false;
+				}
 				return wtObject.isPresent();
 			}
 		}
@@ -206,7 +349,7 @@ public class WorkloadGenerator {
 
 	private ReconfigurationType getAction(int round, int numOfNodes) {
 		if (Q) {
-			if (q > 8) {
+			if (q >= 8) {
 				return ReconfigurationType.ADD_NODE;
 			} else if (q <= 3) {
 				if (numOfNodes > 1) {
@@ -218,8 +361,6 @@ public class WorkloadGenerator {
 				return ReconfigurationType.NOTHING;
 			}
 		} else if (W) {
-			w = wtObject.get();
-			qps = qpsObject.get();
 			addM = 0;
 			removeM = 0;
 			boolean a = true;
@@ -257,7 +398,7 @@ public class WorkloadGenerator {
 						return ReconfigurationType.NOTHING;
 					}
 					return ReconfigurationType.REMOVE_M_NODES;
-				} else if (w > 0.8) {
+				} else if (w >= 0.8) {
 					return ReconfigurationType.ADD_NODE;
 				} else if (w <= 0.300000000) {
 					if (numOfNodes > 1) {
@@ -278,42 +419,11 @@ public class WorkloadGenerator {
 		Outputs result = new Outputs();
 		int debugKey = -1; // TODO for debugging
 		boolean valid = true;
-		int gets = 0, sets = 0;
-		int hashMapLoop = 0, currentKey = -1;
-		boolean hashMapDone = true;
 
-		Map<Integer, Integer> hmReads = null;
-		Map<Integer, Integer> hmWrites = null;
-		Iterator<Integer> itReads = null;
-		Iterator<Integer> itWrites = null;
-
-		if (W && trace == Trace.WC98Daily) {
-			if (wtReads.isPresent()) {
-				hmReads = wtReads.get();
-				itReads = hmReads.keySet().iterator();
-			}
-			if (wtWrites.isPresent()) {
-				hmWrites = wtWrites.get();
-				itWrites = hmWrites.keySet().iterator();
-			}
-		}
-
-		for (int key = 0; hasKeys(key, itReads, hashMapDone); key++) {
+		for (int key = 0; key < K; key++) {
 			valid = true;
-			if (W && trace == Trace.WC98Daily) {
-				hashMapDone = false;
-				if (currentKey == -1 || hashMapLoop >= hmReads.get(currentKey)) {
-					currentKey = itReads.next();
-					hashMapLoop = 0;
-				}
-				key = currentKey;
-				hashMapLoop++;
-				if (hashMapLoop == hmReads.get(currentKey)) {
-					hashMapDone = true;
-				}
-			}
 			ValueWrapper getOutput = sys.get(key);
-			gets++;
+			result.gets++;
 			if (key == debugKey) {
 				System.out.print("key " + key + ", P" + P[getHash(key)] + ", value" + getOutput);
 			}
@@ -328,9 +438,7 @@ public class WorkloadGenerator {
 					System.out.print(" ... is null");
 				}
 				result.miss_keys++;
-				if (!W || trace != Trace.WC98Daily) {
-					setWithLatestValue(sys, key, cid);
-				}
+				setWithLatestValue(sys, key, cid);
 				valid = false;
 			} else if (is_lost(key, getOutput.config_num, P)) {
 				valid = false;
@@ -338,25 +446,22 @@ public class WorkloadGenerator {
 				if (key == debugKey) {
 					System.out.print(" ... is lost");
 				}
-				if (!W || trace != Trace.WC98Daily) {
-					if (is_stale(key, isNoAction ? cid : (cid - 1), getOutput.value, 1)) {
-						result.lost_key_stales++;
-						if (key == debugKey) {
-							System.out.print(" ... is stale");
-						}
-					}
-				}
-			} else if (!W || trace != Trace.WC98Daily) {
-				if (is_stale(key, isNoAction ? cid : (cid - 1), getOutput.value, 2)) {
-
-					valid = false;
-					// Exit debug
+				if (is_stale(key, isNoAction ? cid : (cid - 1), getOutput.value, 1)) {
+					result.lost_key_stales++;
 					if (key == debugKey) {
-						System.out.println(" ... is stale");
+						System.out.print(" ... is stale");
 					}
-					System.out.println("ERROR: stale value that is not lost in key " + key);
-					System.exit(0);
 				}
+			} else if (is_stale(key, isNoAction ? cid : (cid - 1), getOutput.value, 2)) {
+
+				valid = false;
+				// Exit debug
+				if (key == debugKey) {
+					System.out.println(" ... is stale");
+				}
+				System.out.println("ERROR: stale value that is not lost in key " + key);
+				System.exit(0);
+
 			}
 			if (key == debugKey) {
 				System.out.println();
@@ -366,55 +471,22 @@ public class WorkloadGenerator {
 			}
 		}
 
-		hashMapDone = true;
-		currentKey = -1;
-		hashMapLoop = 0;
-		
-		for (int key = 0; hasKeys(key, itWrites, hashMapDone); key++) {
-			if (W && trace == Trace.WC98Daily) {
-
-				hashMapDone = false;
-				if (currentKey == -1 || hashMapLoop >= hmWrites.get(currentKey)) {
-					currentKey = itWrites.next();
-					hashMapLoop = 0;
-				}
-				key = currentKey;
-				hashMapLoop++;
-				if (hashMapLoop == hmWrites.get(currentKey)) {
-					hashMapDone = true;
-				}
-				
+		for (int key = 0; key < K; key++) {
+			if ((key + cid) % keys_to_update_mod == 0) {
 				sys.set(key, getValue(key, cid), cid, true);
-				sets++;
-			} else if ((key + cid) % keys_to_update_mod == 0) {
-				sys.set(key, getValue(key, cid), cid, true);
-				sets++;
+				result.sets++;
 			}
 		}
 
-		if (W && trace == Trace.WC98Daily) {
-			if (wtWrites.isPresent())
-				itWrites = hmWrites.keySet().iterator();
-		}
-
-		hashMapDone = true;
-		currentKey = -1;
-		hashMapLoop = 0;
-
-		for (int key = 0; hasKeys(key, itWrites, hashMapDone); key++) {
-			if (W && trace == Trace.WC98Daily) {
-				key = itWrites.next();				
-			} else {
-				if ((key + cid) % keys_to_update_mod != 0)
-					continue;
+		for (int key = 0; key < K; key++) {
+			if ((key + cid) % keys_to_update_mod != 0) {
+				continue;
 			}
 			ValueWrapper getOutput = sys.get(key);
-			if (!W || trace != Trace.WC98Daily) {
-				if (is_stale(key, cid, getOutput.value, 3)) {
-					// Exit debug
-					System.out.println("ERROR: stale value for a key we just set");
-					System.exit(0);
-				}
+			if (is_stale(key, cid, getOutput.value, 3)) {
+				// Exit debug
+				System.out.println("ERROR: stale value for a key we just set");
+				System.exit(0);
 			}
 			if (is_lost(key, getOutput.config_num, P)) {
 				// Exit debug
@@ -426,24 +498,24 @@ public class WorkloadGenerator {
 		// System.out.println(String.format("Valid: %d, Lost: %d (Stale: %d), null: %d",
 		// result.valid_keys, result.lost_keys, result.lost_key_stales,
 		// result.miss_keys));
-		System.out.println(String.format("%d,%d,%d,%d,%d,%d,%d,%d", gets, sets, result.valid_keys, result.lost_keys,
-				result.lost_key_stales, result.miss_keys, result.mig, result.mig_invalid));
+		System.out.println(String.format("%d,%d,%d,%d,%d,%d,%d,%d", result.gets, result.sets, result.valid_keys,
+				result.lost_keys, result.lost_key_stales, result.miss_keys, result.mig, result.mig_invalid));
 
 		return result;
 	}
 
-	private boolean hasKeys(int key, Iterator<Integer> it, boolean hashMapDone) {
-		if (trace != Trace.WC98Daily) {
-			return key < K;
-		} else {
-			if (it == null) {
-				return false;
-			}
-			if(hashMapDone)
-				return it.hasNext();
-			return true;
-		}
-	}
+	// private boolean hasKeys(int key, Iterator<Integer> it, boolean hashMapDone) {
+	// if (trace != Trace.WC98Daily) {
+	// return key < K;
+	// } else {
+	// if (it == null) {
+	// return false;
+	// }
+	// if (hashMapDone)
+	// return it.hasNext();
+	// return true;
+	// }
+	// }
 
 	private void setWithLatestValue(TheSystem sys, int key, int cid) {
 		for (int temp_cid = cid; temp_cid > 0; temp_cid--) {
