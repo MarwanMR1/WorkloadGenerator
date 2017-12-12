@@ -22,6 +22,14 @@ public class AzureVMEventTrace {
 			return "VMEvent [addVMs=" + addVMs + ", removeVMs=" + removeVMs + "]";
 		}
 
+		public Set<Integer> getAddVMs() {
+			return addVMs;
+		}
+
+		public Set<Integer> getRemoveVMs() {
+			return removeVMs;
+		}
+
 	}
 
 	private final TreeMap<Long, VMEvent> timeVMStateMap = Maps.newTreeMap();
@@ -48,14 +56,22 @@ public class AzureVMEventTrace {
 					if (v == null) {
 						v = new VMEvent();
 					}
-					v.addVMs.add(id);
+					if (v.removeVMs.contains(id)) {
+						v.removeVMs.remove(id);
+					} else {
+						v.addVMs.add(id);
+					}
 					return v;
 				});
 				timeVMStateMap.compute(delete, (k, v) -> {
 					if (v == null) {
 						v = new VMEvent();
 					}
-					v.removeVMs.add(id);
+					if (v.addVMs.contains(id)) {
+						v.addVMs.remove(id);
+					} else {
+						v.removeVMs.add(id);
+					}
 					return v;
 				});
 			}

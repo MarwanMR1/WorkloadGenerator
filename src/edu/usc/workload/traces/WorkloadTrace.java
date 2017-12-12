@@ -65,12 +65,6 @@ public abstract class WorkloadTrace {
 		return Optional.of(stats);
 	}
 
-	protected void initialize(int size) {
-		for (int i = 0; i < size; i++) {
-			statsTimeline.add(new StatsImpl(0, 0));
-		}
-	}
-
 	public static class WCRequest {
 		public int getKey() {
 			return key;
