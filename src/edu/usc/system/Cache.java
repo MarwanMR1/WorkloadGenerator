@@ -3,7 +3,7 @@ package edu.usc.system;
 import java.util.ArrayList;
 
 public class Cache {
-	public final String id;
+	public String id;
 	public ArrayList<Partition> partitions;
 	public Node node;
 	
@@ -15,5 +15,9 @@ public class Cache {
 	
 	public String toString() {
 		return id+"[numP: " + partitions.size()+"]";
+	}
+	
+	public void updateID(int nodeID) {
+		id = nodeID + id.substring(id.indexOf("-"));
 	}
 }

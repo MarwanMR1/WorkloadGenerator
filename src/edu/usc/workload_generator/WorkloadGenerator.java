@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.usc.main.MainClass;
 import edu.usc.system.Configuration;
@@ -21,7 +22,7 @@ import edu.usc.workload.traces.WorkloadTrace.WCRequest;
 public class WorkloadGenerator {
 
 	public enum ReconfigurationType {
-		ADD_NODE, REMOVE_NODE, ADD_M_NODES, REMOVE_M_NODES, NOTHING
+		ADD_NODE, REMOVE_NODE, ADD_M_NODES, REMOVE_M_NODES, NOTHING, ADD_REMOVE_VM
 	}
 
 	public enum Trace {
@@ -46,8 +47,12 @@ public class WorkloadGenerator {
 	public static GoogleVMEventTrace google;
 	private String outputFileLocation;
 	private Optional<Stats> wtObject;
+	private Optional<VMEvent> vmObject;
+	private Set<Integer> vmAdd;
+	private Set<Integer> vmRemove;
 	private final int BATCH_SIZE = 1000;
 	private boolean firstTime = true;
+	private String p2str = "";
 
 	// private HashMap<Integer, GetOutput> cache = new HashMap<>();
 
@@ -79,26 +84,48 @@ public class WorkloadGenerator {
 		}
 
 		if (W) {
-			wtObject = wt.getNextStats();
-			if (wtObject.isPresent()) {
-				Stats stats = wtObject.get();
-				w = stats.getQpsFactor();
-				qps = stats.getQps();
-				Nn = (int) Math.round(((double) qps) / MainClass.C);
-				if(Nn == 0) {
-					Nn = 1;
+			if (trace != Trace.GoogleVM && trace != Trace.AzureVM) {
+				wtObject = wt.getNextStats();
+				if (wtObject.isPresent()) {
+					Stats stats = wtObject.get();
+					w = stats.getQpsFactor();
+					qps = stats.getQps();
+					Nn = (int) Math.round(((double) qps) / MainClass.C);
+					if (Nn == 0) {
+						Nn = 1;
+					}
+
+					System.out.println("UPDATE init values");
+					System.out.println("N: " + Nn);
+				} else {
+					System.out.println("ERROR: wtObject isEmpty in the first check");
+					System.exit(0);
 				}
-
-				System.out.println("UPDATE init values");
-				System.out.println("N: " + Nn);
 			} else {
-				System.out.println("ERROR: wtObject isEmpty in the first check");
-				System.exit(0);
-			}
+				if (trace == Trace.GoogleVM) {
+					vmObject = google.getNextEvent();
+				} else {
+					vmObject = azure.getNextEvent();
+				}
+				if (vmObject.isPresent()) {
+					VMEvent stats = vmObject.get();
+					vmAdd = stats.getAddVMs();
+					vmRemove = stats.getRemoveVMs();
+					Nn = vmAdd.size() - vmRemove.size();
+					if (Nn == 0) {
+						Nn = 1;
+					}
 
+					System.out.println("UPDATE init values");
+					System.out.println("N: " + Nn);
+				} else {
+					System.out.println("ERROR: vmObject isEmpty in the first check");
+					System.exit(0);
+				}
+			}
 		}
 		// long start = System.nanoTime();
-		TheSystem sys = new TheSystem(Nn, L, numOfPartitions);
+		TheSystem sys = new TheSystem(Nn, L, numOfPartitions, trace, vmAdd, vmRemove);
 		// long duration = System.nanoTime() - start;
 		// System.out.println("init TheSystem " + (duration / 1000000000.0) + " sec");
 
@@ -146,19 +173,23 @@ public class WorkloadGenerator {
 					qBase *= -1;
 				}
 			} else if (W) {
-				Stats stats = wtObject.get();
-				w = stats.getQpsFactor();
-				qps = stats.getQps();
+				if (trace != Trace.GoogleVM && trace != Trace.AzureVM) {
+					Stats stats = wtObject.get();
+					w = stats.getQpsFactor();
+					qps = stats.getQps();
+				}
 			}
+			p2str = sys.P[2].toString();
 			ReconfigurationType action = getAction(loop, sys.getN());
 
 			if ((trace == Trace.WC98Daily && numHours == 24)
 					|| (trace != Trace.WC98Daily && action != ReconfigurationType.NOTHING)) {
-				out.println(String.format("%d,%d,%d,%d,%f,%d,%d,%d", con.config, sys.getN(), logAdded, logRemoved, oldW,
-						valid_keys, lost_keys, missed_keys, gets, sets));
+				out.println(String.format("%d,%d,%d,%d,%f,%d,%d,%d,%d,%d", con.config, sys.getN(), logAdded, logRemoved,
+						oldW, valid_keys, lost_keys, missed_keys, gets, sets));
 				out.flush();
 				lost_keys = 0;
 				missed_keys = 0;
+				valid_keys = 0;
 				gets = 0;
 				sets = 0;
 				oldW = w;
@@ -172,8 +203,8 @@ public class WorkloadGenerator {
 			case ADD_NODE:
 				addM_round = 1;
 				removeM_round = 0;
-				logAdded = 1;
-				logRemoved = 0;
+				logAdded += 1;
+				logRemoved += 0;
 				// start = System.nanoTime();
 				sys.addNode();
 				// duration = System.nanoTime() - start;
@@ -183,8 +214,8 @@ public class WorkloadGenerator {
 			case REMOVE_NODE:
 				addM_round = 0;
 				removeM_round = 1;
-				logAdded = 0;
-				logRemoved = 1;
+				logAdded += 0;
+				logRemoved += 1;
 				// start = System.nanoTime();
 				sys.removeNode();
 				// duration = System.nanoTime() - start;
@@ -194,11 +225,11 @@ public class WorkloadGenerator {
 			case ADD_M_NODES:
 				addM_round = addM;
 				removeM_round = 0;
-				logAdded = addM;
-				logRemoved = 0;
+				logAdded += addM;
+				logRemoved += 0;
 				// start = System.nanoTime();
 				// long start = System.nanoTime();
-				sys.addMultipleNodes(addM);
+				sys.addMultipleNodes(addM, null, true);
 				// long duration = System.nanoTime() - start;
 				// System.out.println("addNode " + (duration / 1000000000.0) + " sec");
 				actionName = "addM-" + addM;
@@ -208,15 +239,26 @@ public class WorkloadGenerator {
 			case REMOVE_M_NODES:
 				addM_round = 0;
 				removeM_round = removeM;
-				logAdded = 0;
-				logRemoved = removeM;
+				logAdded += 0;
+				logRemoved += removeM;
 				// long start = System.nanoTime();
-				sys.removeMultipleNode(removeM);
+				sys.removeMultipleNode(removeM, null, true);
 				// long duration = System.nanoTime() - start;
 				// System.out.println("RemoveNode " + (duration / 1000000000.0) + " sec");
 				actionName = "removeM-" + removeM;
 				// System.out.println(sys.cachesPartitionsInfo());
 				// sys.debugPartitions();
+				break;
+			case ADD_REMOVE_VM:
+				addM_round = vmAdd.size();
+				removeM_round = vmRemove.size();
+				logAdded += vmAdd.size();
+				logRemoved += vmRemove.size();
+
+				sys.addRemoveVM(vmAdd, vmRemove);
+
+				actionName = "add-" + addM_round + "-remove-" + removeM_round;
+
 				break;
 			case NOTHING:
 				addM_round = 0;
@@ -224,6 +266,9 @@ public class WorkloadGenerator {
 				actionName = "noAction";
 				break;
 			}
+
+			p2str += ", " + sys.P[2].toString();
+
 			con = sys.getConfiguration();
 			System.out.print(loop + "," + actionName + "," + con.config + ",");
 			if (Q) {
@@ -243,6 +288,7 @@ public class WorkloadGenerator {
 			} else {
 				result = perform_Operations(sys, con.P, con.config, action == ReconfigurationType.NOTHING);
 			}
+
 			valid_keys += result.valid_keys;
 			lost_keys += result.lost_keys;
 			missed_keys += result.miss_keys;
@@ -250,6 +296,7 @@ public class WorkloadGenerator {
 			sets += result.sets;
 
 			total.add(result);
+//			System.out.println(p2str);
 		}
 
 		out.close();
@@ -330,9 +377,31 @@ public class WorkloadGenerator {
 	private boolean isDone(int loop, int loop_size) {
 		if (W) {
 			if (trace == Trace.AzureVM) {
-				Optional<VMEvent> a = azure.getNextEvent();
+				firstTime = false;
+				if (!firstTime) {
+					vmObject = azure.getNextEvent();
+					if (vmObject.isPresent()) {
+						VMEvent stats = vmObject.get();
+						vmAdd = stats.getAddVMs();
+						vmRemove = stats.getRemoveVMs();
+					}
+				} else {
+					firstTime = false;
+				}
+				return vmObject.isPresent();
 			} else if (trace == Trace.GoogleVM) {
-				google.getNextEvent();
+				firstTime = false;
+				if (!firstTime) {
+					vmObject = google.getNextEvent();
+					if (vmObject.isPresent()) {
+						VMEvent stats = vmObject.get();
+						vmAdd = stats.getAddVMs();
+						vmRemove = stats.getRemoveVMs();
+					}
+				} else {
+					firstTime = false;
+				}
+				return vmObject.isPresent();
 			} else {
 				if (!firstTime) {
 					wtObject = wt.getNextStats();
@@ -363,51 +432,62 @@ public class WorkloadGenerator {
 		} else if (W) {
 			addM = 0;
 			removeM = 0;
-			boolean a = true;
-			if (a) {
-				int delta = (int) Math.round((((double) qps) / MainClass.C) - numOfNodes);
-				if (delta > 1) {
-					addM = delta;
-					return ReconfigurationType.ADD_M_NODES;
-				} else if (delta == 1) {
-					return ReconfigurationType.ADD_NODE;
-				} else if (delta == -1) {
-					if (numOfNodes == 1) {
+			if (trace != Trace.GoogleVM && trace != Trace.AzureVM) {
+				boolean a = true;
+				if (a) {
+					if (qps == 0) {
 						return ReconfigurationType.NOTHING;
 					}
-					return ReconfigurationType.REMOVE_NODE;
-				} else if (delta < -1) {
-					if (numOfNodes == 1) {
-						return ReconfigurationType.NOTHING;
-					}
-					removeM = Math.min(delta * -1, numOfNodes - 1);
-
-					return ReconfigurationType.REMOVE_M_NODES;
-				} else {
-					return ReconfigurationType.NOTHING;
-				}
-			} else {
-				if (w > 1) {
-					// addM = (int) Math.round(Math.max(((w / 1) * numOfNodes) - numOfNodes, 1));
-					addM = (int) Math.round(Math.max((((double) qps) / MainClass.C) - numOfNodes, 1));
-					return ReconfigurationType.ADD_M_NODES;
-				} else if (w < 0.1) {
-					removeM = (int) Math.round(Math.max((0.1 - w) * numOfNodes, 1));
-					removeM = Math.min(removeM, numOfNodes - 1);
-					if (removeM == 0) {
-						return ReconfigurationType.NOTHING;
-					}
-					return ReconfigurationType.REMOVE_M_NODES;
-				} else if (w >= 0.8) {
-					return ReconfigurationType.ADD_NODE;
-				} else if (w <= 0.300000000) {
-					if (numOfNodes > 1) {
+					int delta = (int) Math.round((((double) qps) / MainClass.C) - numOfNodes);
+					if (delta > 1) {
+						addM = delta;
+						return ReconfigurationType.ADD_M_NODES;
+					} else if (delta == 1) {
+						return ReconfigurationType.ADD_NODE;
+					} else if (delta == -1) {
+						if (numOfNodes == 1) {
+							return ReconfigurationType.NOTHING;
+						}
 						return ReconfigurationType.REMOVE_NODE;
+					} else if (delta < -1) {
+						if (numOfNodes == 1) {
+							return ReconfigurationType.NOTHING;
+						}
+						removeM = Math.min(delta * -1, numOfNodes - 1);
+
+						return ReconfigurationType.REMOVE_M_NODES;
 					} else {
 						return ReconfigurationType.NOTHING;
 					}
 				} else {
+					if (w > 1) {
+						// addM = (int) Math.round(Math.max(((w / 1) * numOfNodes) - numOfNodes, 1));
+						addM = (int) Math.round(Math.max((((double) qps) / MainClass.C) - numOfNodes, 1));
+						return ReconfigurationType.ADD_M_NODES;
+					} else if (w < 0.1) {
+						removeM = (int) Math.round(Math.max((0.1 - w) * numOfNodes, 1));
+						removeM = Math.min(removeM, numOfNodes - 1);
+						if (removeM == 0) {
+							return ReconfigurationType.NOTHING;
+						}
+						return ReconfigurationType.REMOVE_M_NODES;
+					} else if (w >= 0.8) {
+						return ReconfigurationType.ADD_NODE;
+					} else if (w <= 0.300000000) {
+						if (numOfNodes > 1) {
+							return ReconfigurationType.REMOVE_NODE;
+						} else {
+							return ReconfigurationType.NOTHING;
+						}
+					} else {
+						return ReconfigurationType.NOTHING;
+					}
+				}
+			} else {
+				if (vmAdd.size() == 0 && vmRemove.size() == 0) {
 					return ReconfigurationType.NOTHING;
+				} else {
+					return ReconfigurationType.ADD_REMOVE_VM;
 				}
 			}
 		} else {
@@ -423,6 +503,9 @@ public class WorkloadGenerator {
 		for (int key = 0; key < K; key++) {
 			valid = true;
 			ValueWrapper getOutput = sys.get(key);
+			if (key == 2) {
+				p2str += ", GET " + getOutput;
+			}
 			result.gets++;
 			if (key == debugKey) {
 				System.out.print("key " + key + ", P" + P[getHash(key)] + ", value" + getOutput);
@@ -460,7 +543,7 @@ public class WorkloadGenerator {
 					System.out.println(" ... is stale");
 				}
 				System.out.println("ERROR: stale value that is not lost in key " + key);
-				System.exit(0);
+				 System.exit(0);
 
 			}
 			if (key == debugKey) {
@@ -473,27 +556,49 @@ public class WorkloadGenerator {
 
 		for (int key = 0; key < K; key++) {
 			if ((key + cid) % keys_to_update_mod == 0) {
+				if (key == 2) {
+					p2str += ", SET " + cid;
+				}
 				sys.set(key, getValue(key, cid), cid, true);
 				result.sets++;
 			}
 		}
 
-		for (int key = 0; key < K; key++) {
-			if ((key + cid) % keys_to_update_mod != 0) {
-				continue;
-			}
-			ValueWrapper getOutput = sys.get(key);
-			if (is_stale(key, cid, getOutput.value, 3)) {
-				// Exit debug
-				System.out.println("ERROR: stale value for a key we just set");
-				System.exit(0);
-			}
-			if (is_lost(key, getOutput.config_num, P)) {
-				// Exit debug
-				System.out.println("ERROR: lost key for a key we just set");
-				System.exit(0);
-			}
-		}
+		// int setloop = K/keys_to_update_mod;
+		// for (int i = 0; i < setloop; i++) {
+		// int key = i* keys_to_update_mod - cid;
+		// if (key <= -1) {
+		// setloop++;
+		// continue;
+		// }
+		// if(key >= 10000000) {
+		// break;
+		// }
+		// if ((key + cid) % keys_to_update_mod == 0) {
+		// sys.set(key, getValue(key, cid), cid, true);
+		// result.sets++;
+		// } else {
+		// System.out.println("ERROR in set formla");
+		// System.exit(0);
+		// }
+		// }
+
+		// for (int key = 0; key < K; key++) {
+		// if ((key + cid) % keys_to_update_mod != 0) {
+		// continue;
+		// }
+		// ValueWrapper getOutput = sys.get(key);
+		// if (is_stale(key, cid, getOutput.value, 3)) {
+		// // Exit debug
+		// System.out.println("ERROR: stale value for a key we just set");
+		// System.exit(0);
+		// }
+		// if (is_lost(key, getOutput.config_num, P)) {
+		// // Exit debug
+		// System.out.println("ERROR: lost key for a key we just set");
+		// System.exit(0);
+		// }
+		// }
 
 		// System.out.println(String.format("Valid: %d, Lost: %d (Stale: %d), null: %d",
 		// result.valid_keys, result.lost_keys, result.lost_key_stales,

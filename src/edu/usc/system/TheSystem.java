@@ -3,44 +3,55 @@ package edu.usc.system;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 
 import edu.usc.system.Partition.PartitionStatus;
 import edu.usc.workload_generator.WorkloadGenerator;
+import edu.usc.workload_generator.WorkloadGenerator.Trace;
 
 public class TheSystem {
 
 	public static int MAX_GET_PER_MIGRATION;
 	private int N;
 	private int L;
+	// public HashMap<Integer, Node> nodes = new HashMap<>();
 	public ArrayList<Node> nodes = new ArrayList<>();
 	public ArrayList<Cache> caches = new ArrayList<>();
-	private Partition[] P;
+	public Partition[] P;
 	private final int initialConfig = 0;
 	private int config = initialConfig;
 	private Random rand = new Random(1);
 	private int numOfPartitions;
+	private int nodeID = 0;
 	public static final boolean noMigration = true;
 
 	private boolean deleteWithMigration = false;
 
-	public TheSystem(int N, int L, int numOfPartitions) {
+	public TheSystem(int N, int L, int numOfPartitions, Trace trace, Set<Integer> vmAdd, Set<Integer> vmRemove) {
 		this.N = N;
 		this.numOfPartitions = numOfPartitions;
 		this.L = L;
 
-		for (int i = 0; i < N; i++) {
-			Node n = new Node(i);
-			nodes.add(n);
-			for (int j = 0; j < L; j++) {
-				Cache c = new Cache(i + "-" + j, n);
-				caches.add(c);
-				n.caches.add(c);
+		if (trace == Trace.AzureVM || trace == Trace.GoogleVM) {
+			initVM(vmAdd);
+		} else {
+			for (int i = 0; i < N; i++) {
+				Node n = new Node(nodeID++);
+				// nodes.put(i, n);
+				nodes.add(n);
+				for (int j = 0; j < L; j++) {
+					Cache c = new Cache(i + "-" + j, n);
+					caches.add(c);
+					n.caches.add(c);
+				}
 			}
 		}
 
 		P = new Partition[numOfPartitions];
-
+		int tenP = P.length / 10;
 		for (int i = 0; i < P.length; i++) {
 			P[i] = new Partition(i);
 			int serverIndex = i % caches.size();
@@ -50,6 +61,9 @@ public class TheSystem {
 			P[i].srcServer = null;
 			P[i].srcConfig = -1;
 			P[i].server.partitions.add(P[i]);
+
+			if (i % tenP == 0)
+				System.out.println(i + "/" + P.length);
 		}
 	}
 
@@ -67,7 +81,9 @@ public class TheSystem {
 			System.out.println("N <= nodes.size() after increment.");
 			System.exit(0);
 		}
-		Node n = new Node(nodes.size());
+		int newid = nodeID++;
+		Node n = new Node(newid);
+		// nodes.put(newid, n);
 		nodes.add(n);
 		for (int j = 0; j < L; j++) {
 			Cache c = new Cache(n.id + "-" + j, n);
@@ -82,13 +98,22 @@ public class TheSystem {
 		config++;
 
 		for (int i = 0, j = 0, k = 0; i < migPartitions; i++) {
-			Partition p = caches.get(j).partitions.get(rand.nextInt(caches.get(j).partitions.size()));
+			Partition p = null;
+			try {
+				p = caches.get(j).partitions.get(rand.nextInt(caches.get(j).partitions.size()));
+			} catch (Exception e) {
+				System.out.println("ERROR: caches.get(j).partitions.size = " + caches.get(j).partitions.size());
+				System.out.println("i = " + i + ", migPartitions: " + migPartitions);
+				e.printStackTrace(System.out);
+				System.exit(0);
+			}
 			caches.get(j).partitions.remove(p);
+			// nodes.get(newid).caches.get(k).partitions.add(p);
 			nodes.get(N - 1).caches.get(k).partitions.add(p);
-			// caches.get(N - 1).partitions.add(p);
 			p.srcConfig = p.config;
 			p.config = config;
 			p.srcServer = p.server;
+			// p.server = nodes.get(newid).caches.get(k);
 			p.server = nodes.get(N - 1).caches.get(k);
 			if (!noMigration) {
 				p.status = PartitionStatus.Migration;
@@ -107,13 +132,13 @@ public class TheSystem {
 		}
 	}
 
-	public void addMultipleNodes(int numNodes) {
+	public void addMultipleNodes(int numNodes, Iterator<Integer> itAdd, boolean incConfig) {
 		int migPartitions = calculateNumOfPartitionsToMigrate(numNodes);
-//		long start = System.nanoTime();
+		// long start = System.nanoTime();
 		sortNodesDesc();
 
-//		long duration = System.nanoTime() - start;
-//		System.out.println("sortNodesDesc " + (duration / 1000000000.0) + " sec");
+		// long duration = System.nanoTime() - start;
+		// System.out.println("sortNodesDesc " + (duration / 1000000000.0) + " sec");
 
 		int numOfCaches = caches.size();
 		int firstNew = N;
@@ -124,7 +149,13 @@ public class TheSystem {
 			System.exit(0);
 		}
 		for (int i = 0; i < numNodes; i++) {
-			Node n = new Node(nodes.size());
+			Node n = null;
+			if (itAdd == null) {
+				n = new Node(nodeID++);
+			} else {
+				n = new Node(itAdd.next());
+			}
+			// nodes.put(n.id, n);
 			nodes.add(n);
 			for (int j = 0; j < L; j++) {
 				Cache c = new Cache(n.id + "-" + j, n);
@@ -137,8 +168,11 @@ public class TheSystem {
 			System.out.println("N > nodes.size() twice.");
 			System.exit(0);
 		}
-		config++;
-//		start = System.nanoTime();
+		if (incConfig) {
+			config++;
+		}
+		// start = System.nanoTime();
+		// ArrayList<Integer> keys = new ArrayList<Integer>(nodes.keySet());
 		for (int i = 0, j = 0, k = 0, l = firstNew; i < (migPartitions * numNodes); i++) {
 			Partition p = null;
 			try {
@@ -147,11 +181,13 @@ public class TheSystem {
 				break;
 			}
 			caches.get(j).partitions.remove(p);
+			// nodes.get(keys.get(l)).caches.get(k).partitions.add(p);
 			nodes.get(l).caches.get(k).partitions.add(p);
 			// caches.get(N - 1).partitions.add(p);
 			p.srcConfig = p.config;
 			p.config = config;
 			p.srcServer = p.server;
+			// p.server = nodes.get(keys.get(l)).caches.get(k);
 			p.server = nodes.get(l).caches.get(k);
 			if (!noMigration) {
 				p.status = PartitionStatus.Migration;
@@ -172,8 +208,8 @@ public class TheSystem {
 				}
 			}
 		}
-//		duration = System.nanoTime() - start;
-//		System.out.println("sortNodesDesc " + (duration / 1000000000.0) + " sec");
+		// duration = System.nanoTime() - start;
+		// System.out.println("sortNodesDesc " + (duration / 1000000000.0) + " sec");
 	}
 
 	public void sortNodesDesc() {
@@ -205,7 +241,7 @@ public class TheSystem {
 			return;
 		}
 		config++;
-		ArrayList<Partition> partitionsToMigrate = sortNodesInc(1);
+		ArrayList<Partition> partitionsToMigrate = sortNodesInc(1, null);
 
 		int size = partitionsToMigrate.size();
 		for (int i = 0, j = caches.size() - 1; i < size; i++) {
@@ -229,9 +265,11 @@ public class TheSystem {
 		}
 	}
 
-	public void removeMultipleNode(int numNodes) {
-		config++;
-		ArrayList<Partition> partitionsToMigrate = sortNodesInc(numNodes);
+	public void removeMultipleNode(int numNodes, Iterator<Integer> itRemove, boolean incConfig) {
+		if (incConfig) {
+			config++;
+		}
+		ArrayList<Partition> partitionsToMigrate = sortNodesInc(numNodes, itRemove);
 
 		// Node toBeRemoved = nodes.get(N);
 
@@ -277,11 +315,15 @@ public class TheSystem {
 		// System.out.println("sort caches: " + (duration / 1000000000.0) + " sec");
 	}
 
-	private ArrayList<Partition> sortNodesInc(int numOfNodesToRemove) {
+	private ArrayList<Partition> sortNodesInc(int numOfNodesToRemove, Iterator<Integer> itRemove) {
 		// long start = System.nanoTime();
 		ArrayList<Partition> partitionsToMigrate = new ArrayList<>();
 		for (int i = 0; i < numOfNodesToRemove; i++) {
 			int toRemove = rand.nextInt(N);
+			if (itRemove != null) {
+				toRemove = itRemove.next();
+				toRemove = getNode(toRemove);
+			}
 			Node ntoRemove = nodes.get(toRemove);
 			// nodes.set(toRemove, nodes.get(N - 1));
 			// nodes.set(N - 1, ntoRemove);
@@ -290,7 +332,7 @@ public class TheSystem {
 				caches.remove(c);
 				partitionsToMigrate.addAll(c.partitions);
 			}
-			nodes.remove(ntoRemove);
+			nodes.remove(toRemove);
 			N--;
 
 		}
@@ -342,6 +384,7 @@ public class TheSystem {
 		WorkloadGenerator.isMig_invalid = false;
 		Partition p = P[getHash(key)];
 		ValueWrapper result = p.server.node.hashTable.get(key);
+		
 		if (noMigration) {
 			return result;
 		}
@@ -429,6 +472,116 @@ public class TheSystem {
 				}
 			}
 		}
+	}
+
+	public void initVM(Set<Integer> vmAdd) {
+		Iterator<Integer> itAdd = vmAdd.iterator();
+		int tenP = (int) (vmAdd.size() * 0.1);
+		int count = 0, total = vmAdd.size();
+		while (itAdd.hasNext()) {
+			Node n = new Node(itAdd.next());
+			// nodes.put(i, n);
+			nodes.add(n);
+			for (int j = 0; j < L; j++) {
+				Cache c = new Cache(n.id + "-" + j, n);
+				caches.add(c);
+				n.caches.add(c);
+			}
+			count++;
+			if (count % tenP == 0)
+				System.out.println(count + "/" + total);
+		}
+		sortNodes();
+	}
+
+	public void addRemoveVM(Set<Integer> vmAdd, Set<Integer> vmRemove) {
+		Iterator<Integer> itAdd = vmAdd.iterator();
+		Iterator<Integer> itRemove = vmRemove.iterator();
+		ArrayList<Node> newnode = new ArrayList<>();
+		config++;
+		while (itAdd.hasNext() && itRemove.hasNext()) {
+			int addKey = itAdd.next();
+			int removeKey = itRemove.next();
+			int nIndex = getNode(removeKey);
+			if (nIndex == -1) {
+				System.out.println("ERROR: could not find node with id = " + removeKey);
+				System.exit(0);
+			}
+			Node n = nodes.get(nIndex);
+			nodes.remove(nIndex);
+			n.reset(addKey, config);
+			newnode.add(n);
+			// SortNode(n);
+		}
+		if (newnode.size() > 0) {
+			for (Node n : newnode) {
+				nodes.add(n);
+			}
+			sortNodes();
+		}
+
+		int nodesToAdd = vmAdd.size() - vmRemove.size();
+		int nodesToRemove = vmRemove.size() - vmAdd.size();
+		// N += nodesToAdd;
+
+		if (itAdd.hasNext()) {
+			addMultipleNodes(nodesToAdd, itAdd, false);
+		}
+
+		if (itRemove.hasNext()) {
+			removeMultipleNode(nodesToRemove, itRemove, false);
+		}
+		sortNodes();
+	}
+
+	private void sortNodes() {
+		Collections.sort(nodes, new Comparator<Node>() {
+
+			@Override
+			public int compare(Node o1, Node o2) {
+				return Integer.compare(o1.id, o2.id);
+			}
+		});
+	}
+
+	private void SortNode(Node n) {
+		// int sid = 0;
+		// for (int eid = nodes.size() - 1; eid >= sid || eid == 0;) {
+		// int mid = eid - sid;
+		// if (n.id == nodes.get(mid).id) {
+		// System.out.println("ERROR:");
+		// System.exit(0);
+		// } else if (n.id > nodes.get(mid).id) {
+		// sid = mid + 1;
+		// } else {
+		// eid = mid - 1;
+		// }
+		// }
+		// nodes.add(sid, n);
+		sortNodes();
+	}
+
+	private int getNode(int id) {
+		for (int sid = 0, eid = nodes.size() - 1; eid >= sid;) {
+			int mid = eid - sid;
+			if (id == nodes.get(mid).id) {
+				return mid;
+			} else if (id > nodes.get(mid).id) {
+				sid = mid + 1;
+			} else {
+				eid = mid - 1;
+			}
+		}
+		return -1;
+	}
+
+	private int getNode2(int id) {
+		for (int sid = 0; sid < nodes.size(); sid++) {
+			if (id == nodes.get(sid).id) {
+				return sid;
+			}
+		}
+		return -1;
 	}
 
 	// private void update(Partition[] oldP, Partition[] newP, ArrayList<Integer>

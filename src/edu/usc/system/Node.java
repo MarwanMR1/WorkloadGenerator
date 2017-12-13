@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Node {
 	public ArrayList<Cache> caches;
-	public final int id;
+	public int id;
 	public boolean isAlive;
 //	private Random rand;
 	public HashMap<Integer, ValueWrapper> hashTable;
@@ -21,6 +21,17 @@ public class Node {
 
 	public String toString() {
 		return id + "[" + (isAlive ? "ON" : "OFF") + "]";
+	}
+
+	public void reset(int addKey, int config) {
+		id = addKey;
+		hashTable.clear();
+		for(Cache c : caches) {
+			c.updateID(id);
+			for(Partition p : c.partitions) {
+				p.config = config;
+			}
+		}
 	}
 
 //	public int getTotalNumPartitions() {

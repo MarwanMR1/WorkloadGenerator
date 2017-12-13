@@ -21,10 +21,10 @@ public class MainClass {
 	static int N = 100;
 	static int L = 100;
 	static float kuP = 0.05f;
-	public static int numOfPartitionsInL = 100;
-	public static int numOfKeysInPartition = 100;
+	public static int numOfPartitions = 100;
+	public static int numOfKeysInPartition = 10;
 	static int workload = -1;
-	public static int C = 1000000;
+	public static int C = 1000;
 	static TimeUnit timeUnit = TimeUnit.HOURS;
 	private static String outputFileLocation;
 
@@ -33,16 +33,17 @@ public class MainClass {
 	private static final int MAX_WORKLOAD = 6;
 
 	public static void main(String[] args) {
-		TheSystem.MAX_GET_PER_MIGRATION = 50;
+		numOfPartitions = 1000000;
+		TheSystem.MAX_GET_PER_MIGRATION = 5;
 		handleArguments(args);
-		System.out.println(
-				String.format("N = %d, L = %d, kuP = %f, P_in_L = %d, Key_in_P = %d, max get per mig = %d, C = %d", N,
-						L, kuP, numOfPartitionsInL, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION, C));
+
+		System.out
+				.println(String.format("N = %d, L = %d, kuP = %f, P = %d, Key_in_P = %d, max get per mig = %d, C = %d",
+						N, L, kuP, numOfPartitions, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION, C));
 		if (workload == 6) {
 			System.out.println("Trace: " + WorkloadGenerator.trace.toString() + ", Location: " + location);
 		}
 		System.out.println("Workload " + workload);
-		int numOfPartitions = N * L * numOfPartitionsInL;
 		int K = numOfPartitions * numOfKeysInPartition;
 		int number_Of_Iterations = 30;
 
@@ -92,7 +93,7 @@ public class MainClass {
 				WorkloadGenerator.wt = new WorldCup98AllTrace(C, location);
 				break;
 			case WC98Daily:
-//				WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
+				// WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
 				WorkloadGenerator.wt = new WorldCup98Trace(C, location);
 				break;
 			case Wikipedia:
@@ -128,18 +129,19 @@ public class MainClass {
 			}
 		}
 
-		WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op, outputFileLocation);
-		
+		WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op,
+				outputFileLocation);
+
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
-		System.out.println(dateFormat.format(date)); 
-		
+		System.out.println(dateFormat.format(date));
+
 		Outputs o = w.run();
-		
+
 		o.print();
-		
+
 		date = new Date();
-		System.out.println(dateFormat.format(date)); 
+		System.out.println(dateFormat.format(date));
 
 	}
 
@@ -172,7 +174,7 @@ public class MainClass {
 				handleArguments_valueExist(i, args.length,
 						"Missing number of partitions per logical node. The value for -P.");
 				i++;
-				numOfPartitionsInL = handleArguments_parseInt(args[i]);
+				numOfPartitions = handleArguments_parseInt(args[i]);
 				break;
 			case "-K":
 				handleArguments_valueExist(i, args.length, "Missing number of keys per partition. The value for -K.");
@@ -196,7 +198,8 @@ public class MainClass {
 				outputFileLocation = args[i];
 				break;
 			case "-trace":
-				handleArguments_valueExist(i, args.length, "Missing trace [azure, google, wcAll, wcDaily, wiki] after -trace.");
+				handleArguments_valueExist(i, args.length,
+						"Missing trace [azure, google, wcAll, wcDaily, wiki] after -trace.");
 				i++;
 				WorkloadGenerator.trace = handleArguments_parseTrace(args[i]);
 				break;
@@ -227,8 +230,8 @@ public class MainClass {
 		} else if (L < 1) {
 			System.err.println("ERROR: L < 1.");
 			System.exit(0);
-		} else if (numOfPartitionsInL < 1) {
-			System.err.println("ERROR: P < 1.");
+		} else if (numOfPartitions < 1000) {
+			System.err.println("ERROR: P < 1000.");
 			System.exit(0);
 		} else if (numOfKeysInPartition < 1) {
 			System.err.println("ERROR: K < 1.");
@@ -243,7 +246,8 @@ public class MainClass {
 			System.err.println("ERROR: trace is missing. Use -trace [azure, google, wcAll, wcDaily, wiki]");
 			System.exit(0);
 		} else if (outputFileLocation == null) {
-			System.err.println("ERROR: output file location is null. Please use -outputfile to set the output file location.");
+			System.err.println(
+					"ERROR: output file location is null. Please use -outputfile to set the output file location.");
 			System.exit(0);
 		}
 	}

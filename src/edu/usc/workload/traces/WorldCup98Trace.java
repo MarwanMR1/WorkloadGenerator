@@ -123,7 +123,7 @@ public class WorldCup98Trace extends WorkloadTrace {
 				req = stats.get().getNextBatchRequests(10000);
 			}
 			System.out.println(String.format("day-%d-hour-%d, qps=%d, qpsf=%f, read=%d, write=%d, total=%d",
-					trace.getCurrentDay(), trace.getCurrentHour(), stats.get().qps, stats.get().qpsFactor, reads,
+					trace.getCurrentDay(), trace.getCurrentHour(), stats.get().getQps(), stats.get().getQpsFactor(), reads,
 					writes, reads + writes));
 			stats = trace.getNextStats();
 		}
