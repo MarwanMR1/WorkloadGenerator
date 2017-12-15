@@ -1,63 +1,88 @@
-package edu.usc.system;
+package edu.usc.iqsystem;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
 
-import edu.usc.system.Partition.PartitionStatus;
-import edu.usc.workload_generator.WorkloadGenerator;
+import com.meetup.memcached.IQException;
+import com.meetup.memcached.InvalidValueException;
+import com.meetup.memcached.MemcachedClient;
+import com.meetup.memcached.MemcachedClient.IQGetResult;
+import com.meetup.memcached.SockIOPool;
+
+import edu.usc.iqsystem.IQPartition.PartitionStatus;
+import edu.usc.main.MainClass;
+import edu.usc.system.ValueWrapper;
 import edu.usc.workload_generator.WorkloadGenerator.Trace;
 
-public class TheSystem {
+public class IQSystem {
 
 	public static int MAX_GET_PER_MIGRATION;
 	private int N;
 	private int L;
-	// public HashMap<Integer, Node> nodes = new HashMap<>();
-	public ArrayList<Node> nodes = new ArrayList<>();
-	public ArrayList<Cache> caches = new ArrayList<>();
-	public Partition[] P;
-	private final int initialConfig = 0;
+	// public HashMap<Integer, IQNode> nodes = new HashMap<>();
+	public ArrayList<IQNode> nodes = new ArrayList<>();
+	public ArrayList<IQCache> caches = new ArrayList<>();
+	public IQPartition[] P;
+	private final int initialConfig = 1;
 	private int config = initialConfig;
 	private Random rand = new Random(1);
 	private int numOfPartitions;
-	private int nodeID = 0;
+	private static final int PORT = 11211;
+	private static final int CACHE_POOL_NUM_CONNECTIONS = 200;
 	public static final boolean noMigration = true;
 	private static final boolean useIQTwemcache = true;
-	private String[] IPs = {"h0", "h1", "h2", "h3", "h4", "h5"
-			, "h6", "h7", "h8", "h9", "h10", "h11", "h12", "h13"
-			, "h14", "h15", "h16", "h17", "h18", "h19", "h20"};
-
+	public static String[] emuIPs = { "h0", "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9", "h10", "h11", "h12",
+			"h13", "h14", "h15", "h16", "h17", "h18", "h19" };
+	public static String[] labIPs = { "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5",
+			"10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5",
+			"10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5",
+			"10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5", "10.0.1.5" };
+	private LinkedList<String> notUsedIps = new LinkedList<>();
+	static String[] IPs;
 	private boolean deleteWithMigration = false;
 
-	public TheSystem(int N, int L, int numOfPartitions, Trace trace, Set<Integer> vmAdd, Set<Integer> vmRemove) {
+	public IQSystem(int N, int L, int numOfPartitions, Trace trace, Set<Integer> vmAdd, Set<Integer> vmRemove) {
 		this.N = N;
 		this.numOfPartitions = numOfPartitions;
 		this.L = L;
+
+		if (MainClass.isLab) {
+			IPs = labIPs;
+		} else {
+			IPs = emuIPs;
+		}
+
+		for (int i = 0; i < IPs.length; i++) {
+			notUsedIps.addLast(IPs[i]);
+			setupNodePool(IPs[i]);
+		}
 
 		if (trace == Trace.AzureVM || trace == Trace.GoogleVM) {
 			initVM(vmAdd);
 		} else {
 			for (int i = 0; i < N; i++) {
-				Node n = new Node(nodeID++);
+				IQNode n = new IQNode(IQNode.nextID.getAndIncrement(), notUsedIps.pop(), PORT);
 				// nodes.put(i, n);
 				nodes.add(n);
 				for (int j = 0; j < L; j++) {
-					Cache c = new Cache(i + "-" + j, n);
+					IQCache c = new IQCache(i + "-" + j, n);
 					caches.add(c);
 					n.caches.add(c);
 				}
 			}
 		}
 
-		P = new Partition[numOfPartitions];
+		P = new IQPartition[numOfPartitions];
 		int tenP = P.length / 10;
 		for (int i = 0; i < P.length; i++) {
-			P[i] = new Partition(i);
+			P[i] = new IQPartition(i);
 			int serverIndex = i % caches.size();
 			P[i].server = caches.get(serverIndex);
 			P[i].config = initialConfig;
@@ -71,8 +96,24 @@ public class TheSystem {
 		}
 	}
 
-	public Configuration getConfiguration() {
-		return new Configuration(P, config);
+	private void setupNodePool(String ip) {
+		String host = ip + ":" + PORT;
+		SockIOPool pool = SockIOPool.getInstance(host);
+		String[] serverList = { host };
+		pool.setServers(serverList);
+		pool.setFailover(false);
+		pool.setInitConn(CACHE_POOL_NUM_CONNECTIONS);
+		pool.setMinConn(CACHE_POOL_NUM_CONNECTIONS);
+		pool.setMaxConn(CACHE_POOL_NUM_CONNECTIONS);
+		pool.setMaintSleep(30);
+		pool.setNagle(false);
+		pool.setSocketTO(0);
+		pool.setAliveCheck(false);
+		pool.initialize();
+	}
+
+	public IQConfiguration getConfiguration() {
+		return new IQConfiguration(P, config);
 	}
 
 	public void addNode() {
@@ -85,12 +126,12 @@ public class TheSystem {
 			System.out.println("N <= nodes.size() after increment.");
 			System.exit(0);
 		}
-		int newid = nodeID++;
-		Node n = new Node(newid);
+		int newid = IQNode.nextID.getAndIncrement();
+		IQNode n = new IQNode(newid, notUsedIps.pop(), PORT);
 		// nodes.put(newid, n);
 		nodes.add(n);
 		for (int j = 0; j < L; j++) {
-			Cache c = new Cache(n.id + "-" + j, n);
+			IQCache c = new IQCache(n.id + "-" + j, n);
 			caches.add(c);
 			n.caches.add(c);
 		}
@@ -100,9 +141,10 @@ public class TheSystem {
 			System.exit(0);
 		}
 		config++;
+		updateIQConfig();
 
 		for (int i = 0, j = 0, k = 0; i < migPartitions; i++) {
-			Partition p = null;
+			IQPartition p = null;
 			try {
 				p = caches.get(j).partitions.get(rand.nextInt(caches.get(j).partitions.size()));
 			} catch (Exception e) {
@@ -136,6 +178,17 @@ public class TheSystem {
 		}
 	}
 
+	private void updateIQConfig() {
+		try {
+			for (IQNode n : nodes) {
+				n.updateITwemcacheConfigurationNumber(config);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+			System.exit(0);
+		}
+	}
+
 	public void addMultipleNodes(int numNodes, Iterator<Integer> itAdd, boolean incConfig) {
 		int migPartitions = calculateNumOfPartitionsToMigrate(numNodes);
 		// long start = System.nanoTime();
@@ -153,16 +206,16 @@ public class TheSystem {
 			System.exit(0);
 		}
 		for (int i = 0; i < numNodes; i++) {
-			Node n = null;
+			IQNode n = null;
 			if (itAdd == null) {
-				n = new Node(nodeID++);
+				n = new IQNode(IQNode.nextID.getAndIncrement(), notUsedIps.pop(), PORT);
 			} else {
-				n = new Node(itAdd.next());
+				n = new IQNode(itAdd.next(), notUsedIps.pop(), PORT);
 			}
 			// nodes.put(n.id, n);
 			nodes.add(n);
 			for (int j = 0; j < L; j++) {
-				Cache c = new Cache(n.id + "-" + j, n);
+				IQCache c = new IQCache(n.id + "-" + j, n);
 				caches.add(c);
 				n.caches.add(c);
 			}
@@ -174,11 +227,14 @@ public class TheSystem {
 		}
 		if (incConfig) {
 			config++;
+			updateIQConfig();
 		}
 		// start = System.nanoTime();
 		// ArrayList<Integer> keys = new ArrayList<Integer>(nodes.keySet());
-		for (int i = 0, j = 0, l = numOfCaches; i < (migPartitions * numNodes); i++) {
-			Partition p = null;
+		// for (int i = 0, j = 0, k = 0, l = firstNew; i < (migPartitions * numNodes *
+		// L); i++) {
+		for (int i = 0, j = 0, l = numOfCaches; i < (migPartitions * numNodes * L); i++) {
+			IQPartition p = null;
 			try {
 				p = caches.get(j).partitions.get(rand.nextInt(caches.get(j).partitions.size()));
 			} catch (IllegalArgumentException e) {
@@ -204,27 +260,26 @@ public class TheSystem {
 			}
 
 			l++;
-			if(l == caches.size()) {
+			if (l == caches.size()) {
 				l = numOfCaches;
 			}
-
-//			k++;
-//			if (k == L) {
-//				k = 0;
-//				l++;
-//				if (l == N) {
-//					l = firstNew;
-//				}
-//			}
+			// k++;
+			// if (k == L) {
+			// k = 0;
+			// l++;
+			// if (l == N) {
+			// l = firstNew;
+			// }
+			// }
 		}
 		// duration = System.nanoTime() - start;
 		// System.out.println("sortNodesDesc " + (duration / 1000000000.0) + " sec");
 	}
 
 	public void sortNodesDesc() {
-		Collections.sort(caches, new Comparator<Cache>() {
+		Collections.sort(caches, new Comparator<IQCache>() {
 			@Override
-			public int compare(Cache o1, Cache o2) {
+			public int compare(IQCache o1, IQCache o2) {
 				return Integer.compare(o2.partitions.size(), o1.partitions.size());
 			}
 		});
@@ -232,7 +287,7 @@ public class TheSystem {
 		// for (int i = 0; i < N * L; i++) {
 		// for (int j = i + 1; j < N * L; j++) {
 		// if (caches.get(i).partitions.size() < caches.get(j).partitions.size()) {
-		// Cache temp = caches.get(i);
+		// IQCache temp = caches.get(i);
 		// caches.set(i, caches.get(j));
 		// caches.set(j, temp);
 		// }
@@ -241,7 +296,7 @@ public class TheSystem {
 	}
 
 	private int calculateNumOfPartitionsToMigrate(int i) {
-		return (int) Math.round(((double) numOfPartitions) / (N + i));
+		return (int) Math.round(((double) numOfPartitions) / ((N + i) * L));
 	}
 
 	public void removeNode() {
@@ -250,11 +305,12 @@ public class TheSystem {
 			return;
 		}
 		config++;
-		ArrayList<Partition> partitionsToMigrate = sortNodesInc(1, null);
+		updateIQConfig();
+		ArrayList<IQPartition> partitionsToMigrate = sortNodesInc(1, null);
 
 		int size = partitionsToMigrate.size();
 		for (int i = 0, j = caches.size() - 1; i < size; i++) {
-			Partition p = partitionsToMigrate.get(rand.nextInt(partitionsToMigrate.size()));
+			IQPartition p = partitionsToMigrate.get(rand.nextInt(partitionsToMigrate.size()));
 			partitionsToMigrate.remove(p);
 			caches.get(j).partitions.add(p);
 			p.srcConfig = p.config;
@@ -277,18 +333,19 @@ public class TheSystem {
 	public void removeMultipleNode(int numNodes, Iterator<Integer> itRemove, boolean incConfig) {
 		if (incConfig) {
 			config++;
+			updateIQConfig();
 		}
-		ArrayList<Partition> partitionsToMigrate = sortNodesInc(numNodes, itRemove);
+		ArrayList<IQPartition> partitionsToMigrate = sortNodesInc(numNodes, itRemove);
 
-		// Node toBeRemoved = nodes.get(N);
+		// IQNode toBeRemoved = nodes.get(N);
 
 		// long start = System.nanoTime();
 
 		int size = partitionsToMigrate.size();
-		for (int i = 0, j = caches.size()-1; i < size; i++) {
+		for (int i = 0, j = caches.size() - 1; i < size; i++) {
 
 			// long start1 = System.nanoTime();
-			Partition p = partitionsToMigrate.get(partitionsToMigrate.size() - 1);
+			IQPartition p = partitionsToMigrate.get(partitionsToMigrate.size() - 1);
 			// long start2 = System.nanoTime();
 			// String res = "1: " + (start2 - start1);
 			partitionsToMigrate.remove(partitionsToMigrate.size() - 1);
@@ -312,7 +369,7 @@ public class TheSystem {
 
 			j--;
 			if (j == -1) {
-				j = caches.size()-1;
+				j = caches.size() - 1;
 			}
 			// if(i % (size/10) == 0) {
 			// long duration = System.nanoTime() - start;
@@ -324,23 +381,24 @@ public class TheSystem {
 		// System.out.println("sort caches: " + (duration / 1000000000.0) + " sec");
 	}
 
-	private ArrayList<Partition> sortNodesInc(int numOfNodesToRemove, Iterator<Integer> itRemove) {
+	private ArrayList<IQPartition> sortNodesInc(int numOfNodesToRemove, Iterator<Integer> itRemove) {
 		// long start = System.nanoTime();
-		ArrayList<Partition> partitionsToMigrate = new ArrayList<>();
+		ArrayList<IQPartition> partitionsToMigrate = new ArrayList<>();
 		for (int i = 0; i < numOfNodesToRemove; i++) {
 			int toRemove = rand.nextInt(N);
 			if (itRemove != null) {
 				toRemove = itRemove.next();
 				toRemove = getNode(toRemove);
 			}
-			Node ntoRemove = nodes.get(toRemove);
+			IQNode ntoRemove = nodes.get(toRemove);
 			// nodes.set(toRemove, nodes.get(N - 1));
 			// nodes.set(N - 1, ntoRemove);
 
-			for (Cache c : ntoRemove.caches) {
+			for (IQCache c : ntoRemove.caches) {
 				caches.remove(c);
 				partitionsToMigrate.addAll(c.partitions);
 			}
+			notUsedIps.addLast(ntoRemove.ip);
 			nodes.remove(toRemove);
 			N--;
 
@@ -353,9 +411,9 @@ public class TheSystem {
 		// 1000000000.0) + " sec");
 
 		// start = System.nanoTime();
-		Collections.sort(caches, new Comparator<Cache>() {
+		Collections.sort(caches, new Comparator<IQCache>() {
 			@Override
-			public int compare(Cache o1, Cache o2) {
+			public int compare(IQCache o1, IQCache o2) {
 				return Integer.compare(o2.partitions.size(), o1.partitions.size());
 			}
 		});
@@ -366,7 +424,7 @@ public class TheSystem {
 		// for (int i = 0; i < caches.size(); i++) {
 		// for (int j = i + 1; j < caches.size(); j++) {
 		// if (caches.get(i).partitions.size() > caches.get(j).partitions.size()) {
-		// Cache ctemp = caches.get(i);
+		// IQCache ctemp = caches.get(i);
 		// caches.set(i, caches.get(j));
 		// caches.set(j, ctemp);
 		// }
@@ -380,7 +438,7 @@ public class TheSystem {
 		for (int i = 0; i < caches.size(); i++) {
 			for (int j = i + 1; j < caches.size(); j++) {
 				if (caches.get(i).partitions.size() > caches.get(j).partitions.size()) {
-					Cache ctemp = caches.get(i);
+					IQCache ctemp = caches.get(i);
 					caches.set(i, caches.get(j));
 					caches.set(j, ctemp);
 				}
@@ -388,55 +446,111 @@ public class TheSystem {
 		}
 	}
 
-	public ValueWrapper get(int key) {
-		WorkloadGenerator.isMig = false;
-		WorkloadGenerator.isMig_invalid = false;
-		Partition p = P[getHash(key)];
-		ValueWrapper result = p.server.node.hashTable.get(key);
-		
-		if (noMigration) {
-			return result;
+	public GetOutputs get(int key, HashMap<String, MemcachedClient> mc) {
+		GetOutputs out = new GetOutputs();
+
+		IQPartition p = P[getHash(key)];
+		IQGetResult result = null;
+		try {
+			result = (IQGetResult) mc.get(p.server.node.host).iqget(String.valueOf(key), Integer.MAX_VALUE, p.config);
+		} catch (IOException e) {
+			e.printStackTrace(System.out);
+			System.exit(0);
 		}
-		if (result == null) {
-			if (p.status == PartitionStatus.Migration) {
-				result = p.srcServer.node.hashTable.get(key);
-				if (result == null) {
-					return result;
-				} else {
-					if (isValidForMigration(key, result.config_num)) {
-						set(key, result.value, config, false);
-						result.config_num = config;
-						WorkloadGenerator.isMig = true;
-					} else {
-						result = null;
-						WorkloadGenerator.isMig_invalid = true;
-					}
-					if (deleteWithMigration)
-						p.srcServer.node.hashTable.remove(key);
-				}
+		if (result == null || result.getO() == null) {
+			out.isMiss = true;
+			try {
+				setWithLatestValue(key, config, mc.get(p.server.node.host));
+			} catch (IOException | IQException e) {
+				e.printStackTrace(System.out);
+				System.exit(0);
 			}
+		} else {
+			out.value = (String) result.getO();
+			out.config = result.getConfigId();
 		}
-		p.incGetCounter();
-		return result;
+		return out;
 	}
 
+	private void setWithLatestValue(int key, int cid, MemcachedClient mc) throws IOException, IQException {
+		for (int temp_cid = cid; temp_cid > 0; temp_cid--) {
+			if ((key + temp_cid) % IQWorkloadGenerator.keys_to_update_mod == 0) {
+				mc.iqset(String.valueOf(key), IQWorkloadGenerator.getValue(key, temp_cid));
+				return;
+			}
+		}
+		mc.iqset(String.valueOf(key), IQWorkloadGenerator.getValue(key, initialConfig));
+	}
+
+	public void iqset(int key, String value, int config, HashMap<String, MemcachedClient> mc, boolean invalidate) {
+		IQPartition p = P[getHash(key)];
+		try {
+			mc.get(p.server.node.host).set(String.valueOf(key), /* new ValueWrapper(value, config) */ value);
+		} catch (IOException e) {
+			e.printStackTrace(System.out);
+			System.exit(0);
+		}
+	}
+
+	public void set(int key, String value, int config, HashMap<String, MemcachedClient> mc, boolean invalidate) {
+		IQPartition p = P[getHash(key)];
+		try {
+			mc.get(p.server.node.host).set(String.valueOf(key), /* new ValueWrapper(value, config) */ value);
+		} catch (IOException e) {
+			e.printStackTrace(System.out);
+			System.exit(0);
+		}
+	}
+
+	// public ValueWrapper get(int key) {
+	// WorkloadGenerator.isMig = false;
+	// WorkloadGenerator.isMig_invalid = false;
+	// IQPartition p = P[getHash(key)];
+	// ValueWrapper result = p.server.node.hashTable.get(key);
+	//
+	// if (noMigration) {
+	// return result;
+	// }
+	// if (result == null) {
+	// if (p.status == PartitionStatus.Migration) {
+	// result = p.srcServer.node.hashTable.get(key);
+	// if (result == null) {
+	// return result;
+	// } else {
+	// if (isValidForMigration(key, result.config_num)) {
+	// set(key, result.value, config, false);
+	// result.config_num = config;
+	// WorkloadGenerator.isMig = true;
+	// } else {
+	// result = null;
+	// WorkloadGenerator.isMig_invalid = true;
+	// }
+	// if (deleteWithMigration)
+	// p.srcServer.node.hashTable.remove(key);
+	// }
+	// }
+	// }
+	// p.incGetCounter();
+	// return result;
+	// }
+
 	private boolean isValidForMigration(int key, int config_num) {
-		Partition partition = P[getHash(key)];
+		IQPartition partition = P[getHash(key)];
 		if (partition.srcConfig <= config_num)
 			return true;
 		return false;
 	}
 
-	public void set(int key, String value, int config, boolean invalidate) {
-		Partition p = P[getHash(key)];
-		p.server.node.hashTable.put(key, new ValueWrapper(value, config));
-
-		if (!noMigration) {
-			if (invalidate && p.status == PartitionStatus.Migration) {
-				p.srcServer.node.hashTable.remove(key);
-			}
-		}
-	}
+	// public void set(int key, String value, int config, boolean invalidate) {
+	// IQPartition p = P[getHash(key)];
+	// p.server.node.hashTable.put(key, new ValueWrapper(value, config));
+	//
+	// if (!noMigration) {
+	// if (invalidate && p.status == PartitionStatus.Migration) {
+	// p.srcServer.node.hashTable.remove(key);
+	// }
+	// }
+	// }
 
 	private int getHash(int key) {
 		return key % P.length;
@@ -452,7 +566,7 @@ public class TheSystem {
 
 	public String cachesPartitionsInfo() {
 		int max = -1, min = Integer.MAX_VALUE, total = 0;
-		for (Cache c : caches) {
+		for (IQCache c : caches) {
 			total += c.partitions.size();
 			if (c.partitions.size() > max) {
 				max = c.partitions.size();
@@ -466,7 +580,7 @@ public class TheSystem {
 
 	public void debugPartitions() {
 		for (int i = 0; i < P.length; i++) {
-			Partition p = P[i];
+			IQPartition p = P[i];
 			if (!p.server.partitions.contains(p)) {
 				System.out.println();
 			}
@@ -474,8 +588,8 @@ public class TheSystem {
 				System.out.println();
 			}
 		}
-		for (Cache c : caches) {
-			for (Partition p : c.partitions) {
+		for (IQCache c : caches) {
+			for (IQPartition p : c.partitions) {
 				if (!p.server.equals(c)) {
 					System.out.println();
 				}
@@ -488,11 +602,11 @@ public class TheSystem {
 		int tenP = (int) (vmAdd.size() * 0.1);
 		int count = 0, total = vmAdd.size();
 		while (itAdd.hasNext()) {
-			Node n = new Node(itAdd.next());
+			IQNode n = new IQNode(itAdd.next(), notUsedIps.pop(), PORT);
 			// nodes.put(i, n);
 			nodes.add(n);
 			for (int j = 0; j < L; j++) {
-				Cache c = new Cache(n.id + "-" + j, n);
+				IQCache c = new IQCache(n.id + "-" + j, n);
 				caches.add(c);
 				n.caches.add(c);
 			}
@@ -506,8 +620,9 @@ public class TheSystem {
 	public void addRemoveVM(Set<Integer> vmAdd, Set<Integer> vmRemove) {
 		Iterator<Integer> itAdd = vmAdd.iterator();
 		Iterator<Integer> itRemove = vmRemove.iterator();
-		ArrayList<Node> newnode = new ArrayList<>();
+		ArrayList<IQNode> newnode = new ArrayList<>();
 		config++;
+		updateIQConfig();
 		while (itAdd.hasNext() && itRemove.hasNext()) {
 			int addKey = itAdd.next();
 			int removeKey = itRemove.next();
@@ -516,14 +631,14 @@ public class TheSystem {
 				System.out.println("ERROR: could not find node with id = " + removeKey);
 				System.exit(0);
 			}
-			Node n = nodes.get(nIndex);
+			IQNode n = nodes.get(nIndex);
 			nodes.remove(nIndex);
 			n.reset(addKey, config);
 			newnode.add(n);
 			// SortNode(n);
 		}
 		if (newnode.size() > 0) {
-			for (Node n : newnode) {
+			for (IQNode n : newnode) {
 				nodes.add(n);
 			}
 			sortNodes();
@@ -544,16 +659,16 @@ public class TheSystem {
 	}
 
 	private void sortNodes() {
-		Collections.sort(nodes, new Comparator<Node>() {
+		Collections.sort(nodes, new Comparator<IQNode>() {
 
 			@Override
-			public int compare(Node o1, Node o2) {
+			public int compare(IQNode o1, IQNode o2) {
 				return Integer.compare(o1.id, o2.id);
 			}
 		});
 	}
 
-	private void SortNode(Node n) {
+	private void SortNode(IQNode n) {
 		// int sid = 0;
 		// for (int eid = nodes.size() - 1; eid >= sid || eid == 0;) {
 		// int mid = eid - sid;
@@ -593,7 +708,8 @@ public class TheSystem {
 		return -1;
 	}
 
-	// private void update(Partition[] oldP, Partition[] newP, ArrayList<Integer>
+	// private void update(IQPartition[] oldP, IQPartition[] newP,
+	// ArrayList<Integer>
 	// arrayList, int newConfig) {
 	// for (int i = 0; i < oldP.length; i++) {
 	// if (oldP[i].server == newP[i].server) {

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.meetup.memcached.test.IQGetConfigTest;
+
+import edu.usc.iqsystem.IQWorkloadGenerator;
 import edu.usc.system.TheSystem;
 import edu.usc.vmevent.traces.AzureVMEventTrace;
 import edu.usc.vmevent.traces.GoogleVMEventTrace;
@@ -20,15 +23,17 @@ public class MainClass {
 
 	static int N = 100;
 	static int L = 100;
-	static float kuP = 0.05f;
+	static float kuP = 0.2f;
 	public static int numOfPartitions = 100;
 	public static int numOfKeysInPartition = 10;
 	static int workload = -1;
 	public static int C = 1000;
 	static TimeUnit timeUnit = TimeUnit.HOURS;
 	private static String outputFileLocation;
+	static boolean IQ = true;
 
 	static String location = "/home/mr1/eclipse-workspace/WorkloadGenerator/resources/wc.out";
+	public static boolean isLab = false;
 
 	private static final int MAX_WORKLOAD = 6;
 
@@ -41,7 +46,11 @@ public class MainClass {
 				.println(String.format("N = %d, L = %d, kuP = %f, P = %d, Key_in_P = %d, max get per mig = %d, C = %d",
 						N, L, kuP, numOfPartitions, numOfKeysInPartition, TheSystem.MAX_GET_PER_MIGRATION, C));
 		if (workload == 6) {
-			System.out.println("Trace: " + WorkloadGenerator.trace.toString() + ", Location: " + location);
+			if (IQ) {
+				System.out.println("Trace: " + IQWorkloadGenerator.trace.toString() + ", Location: " + location);
+			} else {
+				System.out.println("Trace: " + WorkloadGenerator.trace.toString() + ", Location: " + location);
+			}
 		}
 		System.out.println("Workload " + workload);
 		int K = numOfPartitions * numOfKeysInPartition;
@@ -55,6 +64,13 @@ public class MainClass {
 		WorkloadGenerator.Q = false;
 		WorkloadGenerator.W = false;
 		WorkloadGenerator.WORKLOAD = workload;
+
+		IQWorkloadGenerator.addM = -1;
+		IQWorkloadGenerator.removeM = -1;
+		IQWorkloadGenerator.Q = false;
+		IQWorkloadGenerator.W = false;
+		IQWorkloadGenerator.WORKLOAD = workload;
+
 		switch (workload) {
 		case 1:
 			iterations = 1;
@@ -65,9 +81,18 @@ public class MainClass {
 			remove = 30;
 			break;
 		case 3:
-			iterations = 6;
-			add = 10;
-			remove = 5;
+			if (IQ) {
+				iterations = 6;
+
+				addM = 5;
+				removeM = 3;
+				IQWorkloadGenerator.addM = 1;
+				IQWorkloadGenerator.removeM = 1;
+			} else {
+				iterations = 6;
+				add = 10;
+				remove = 5;
+			}
 			break;
 		case 4:
 			iterations = 6;
@@ -75,33 +100,64 @@ public class MainClass {
 			removeM = 1;
 			WorkloadGenerator.addM = 10;
 			WorkloadGenerator.removeM = 5;
+			IQWorkloadGenerator.addM = 10;
+			IQWorkloadGenerator.removeM = 5;
 			break;
 		case 5:
 			WorkloadGenerator.Q = true;
 			WorkloadGenerator.numOfRounds = 100;
+			IQWorkloadGenerator.Q = true;
+			IQWorkloadGenerator.numOfRounds = 100;
 			break;
 		case 6:
 			WorkloadGenerator.W = true;
+			IQWorkloadGenerator.W = true;
 			switch (WorkloadGenerator.trace) {
 			case AzureVM:
-				WorkloadGenerator.azure = new AzureVMEventTrace(location);
+				if (IQ) {
+					IQWorkloadGenerator.azure = new AzureVMEventTrace(location);
+				} else {
+					WorkloadGenerator.azure = new AzureVMEventTrace(location);
+				}
 				break;
 			case GoogleVM:
-				WorkloadGenerator.google = new GoogleVMEventTrace(location);
+				if (IQ) {
+					IQWorkloadGenerator.google = new GoogleVMEventTrace(location);
+				} else {
+					WorkloadGenerator.google = new GoogleVMEventTrace(location);
+				}
 				break;
 			case WC98All:
-				WorkloadGenerator.wt = new WorldCup98AllTrace(C, location);
+				if (IQ) {
+					IQWorkloadGenerator.wt = new WorldCup98AllTrace(C, location);
+				} else {
+					WorkloadGenerator.wt = new WorldCup98AllTrace(C, location);
+				}
 				break;
 			case WC98Daily:
-				// WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
-				WorkloadGenerator.wt = new WorldCup98Trace(C, location);
+				if (IQ) {
+					IQWorkloadGenerator.wt = new WorldCup98Trace(C, location);
+
+				} else {
+					// WorkloadGenerator.wt = new WorldCup98DailyTrace(C, location, timeUnit);
+					WorkloadGenerator.wt = new WorldCup98Trace(C, location);
+				}
 				break;
 			case Wikipedia:
-				try {
-					WorkloadGenerator.wt = new WikipediaTrace(C, location);
-				} catch (Exception e) {
-					e.printStackTrace(System.out);
-					System.exit(0);
+				if (IQ) {
+					try {
+						IQWorkloadGenerator.wt = new WikipediaTrace(C, location);
+					} catch (Exception e) {
+						e.printStackTrace(System.out);
+						System.exit(0);
+					}
+				} else {
+					try {
+						WorkloadGenerator.wt = new WikipediaTrace(C, location);
+					} catch (Exception e) {
+						e.printStackTrace(System.out);
+						System.exit(0);
+					}
 				}
 				break;
 			default:
@@ -128,15 +184,19 @@ public class MainClass {
 				op.add(WorkloadGenerator.ReconfigurationType.REMOVE_M_NODES);
 			}
 		}
-
-		WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op,
-				outputFileLocation);
-
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		System.out.println(dateFormat.format(date));
-
-		Outputs o = w.run();
+		Outputs o = null;
+		if (IQ) {
+			IQWorkloadGenerator w = new IQWorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op,
+					outputFileLocation);
+			o = w.run();
+		} else {
+			WorkloadGenerator w = new WorkloadGenerator(N, L, K, kuP, numOfPartitions, number_Of_Iterations, op,
+					outputFileLocation);
+			o = w.run();
+		}
 
 		o.print();
 
@@ -157,6 +217,11 @@ public class MainClass {
 				handleArguments_valueExist(i, args.length, "Missing node capacity. The value for -C.");
 				i++;
 				C = handleArguments_parseInt(args[i]);
+				break;
+			case "-T":
+				handleArguments_valueExist(i, args.length, "Missing node capacity. The value for -C.");
+				i++;
+				IQWorkloadGenerator.numOfThreads = handleArguments_parseInt(args[i]);
 				break;
 			case "-workload":
 				handleArguments_valueExist(i, args.length,
@@ -202,6 +267,7 @@ public class MainClass {
 						"Missing trace [azure, google, wcAll, wcDaily, wiki] after -trace.");
 				i++;
 				WorkloadGenerator.trace = handleArguments_parseTrace(args[i]);
+				IQWorkloadGenerator.trace = handleArguments_parseTrace(args[i]);
 				break;
 			case "-time":
 				handleArguments_valueExist(i, args.length,
@@ -242,7 +308,7 @@ public class MainClass {
 		} else if (workload < 1 || workload > MAX_WORKLOAD) {
 			System.err.println("ERROR: workload can be 1, 2, ... to " + MAX_WORKLOAD);
 			System.exit(0);
-		} else if (workload == 6 && WorkloadGenerator.trace == null) {
+		} else if (workload == 6 && WorkloadGenerator.trace == null && IQWorkloadGenerator.trace == null) {
 			System.err.println("ERROR: trace is missing. Use -trace [azure, google, wcAll, wcDaily, wiki]");
 			System.exit(0);
 		} else if (outputFileLocation == null) {
